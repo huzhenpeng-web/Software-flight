@@ -3,6 +3,12 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
+// 引入全局样式
+import '@/assets/css/global.css'
+import '@/plugins/element'
+import '@/utils/focus'
+import '@/utils/filter'
+
 Vue.config.productionTip = false
 
 new Vue({

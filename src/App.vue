@@ -1,31 +1,53 @@
 <template>
   <div id="app">
-    <nav>
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </nav>
-    <router-view/>
+    <el-container class="app-container">
+      <el-aside :width="!isCollapse ? '160px' : '65px'">
+        <Aside></Aside>
+      </el-aside>
+      <el-container>
+        <el-header>
+          <Header></Header>
+        </el-header>
+        <el-main>
+          <!-- 路由占位符 -->
+          <router-view></router-view>
+        </el-main>
+      </el-container>
+    </el-container>
   </div>
 </template>
 
-<style lang="less">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+<script>
+import Aside from '@/components/home/Aside.vue'
+import Header from '@/components/home/Header.vue'
+import { mapState } from 'vuex'
+export default {
+  name: 'App',
+  components: {
+    Aside,
+    Header
+  },
+  computed: {
+    ...mapState(['isCollapse'])
+  }
 }
+</script>
 
-nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
+<style lang="less" scoped>
+#app {
+  width: 100%;
+  height: 100%;
+  min-width: 1366px;
+  .app-container {
+    width: 100%;
+    height: 100%;
+    .el-aside {
+      height: 100%;
+      border-right: 1px solid #DADFE6;
+      overflow: hidden;
+    }
+    .el-main{
+        background-color: #eef1f6;
     }
   }
 }
