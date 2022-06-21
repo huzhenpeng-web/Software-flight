@@ -41,7 +41,10 @@ import {
   Autocomplete,
   Message,
   Empty,
-  MessageBox
+  MessageBox,
+  Tag,
+  OptionGroup,
+  Loading
 } from 'element-ui'
 
 const plugins = [
@@ -84,7 +87,10 @@ const plugins = [
   Carousel,
   CarouselItem,
   Autocomplete,
-  Empty
+  Empty,
+  Tag,
+  OptionGroup,
+  Loading
 ]
 
 plugins.forEach(item => {

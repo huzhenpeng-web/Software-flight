@@ -69,7 +69,9 @@ import { flightQuery } from '@/api/query'
 import City from '@/components/city/City.vue'
 import History from '@/components/Reserve/History.vue'
 import { mapMutations } from 'vuex'
+import { removeDuplicates } from '@/utils/remove'
 export default {
+  name: 'Reserve',
   components: {
     City,
     History
@@ -250,7 +252,7 @@ export default {
     saveHistory (history) {
       this.searchHistory.unshift(history)
       // 去重
-      this.searchHistory = [...new Set(this.searchHistory)]
+      this.searchHistory = removeDuplicates(this.searchHistory)
       // 设置数组长度
       if (this.searchHistory.length > 4) {
         this.searchHistory.splice(this.searchHistory.length - 1, 1)
@@ -283,6 +285,9 @@ export default {
     width: 1180px;
     margin: 0 auto;
     margin-top: 30px;
+    .el-card{
+      overflow: unset;
+    }
     .el-radio-group {
       width: 100%;
       text-align: center;

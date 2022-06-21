@@ -48,6 +48,7 @@ export default {
     if (this.$route.path.includes('/reserve')) {
       return this.updateActivePath('/reserve')
     } else if (this.$route.path.includes('/query')) {
+      console.log(this.$route.path)
       return this.updateActivePath('/query')
     }
     this.updateActivePath(this.$route.path)

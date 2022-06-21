@@ -3,7 +3,7 @@
   <div class="city-container">
     <!-- 输入框 -->
     <div>
-        <el-autocomplete  @select="handleSelect" style="width:200px;" @blur="isShowCity = false" @click.native="displayCity" clearable  v-model="city" :fetch-suggestions="querySearch" placeholder="请输入城市" :trigger-on-focus="false"></el-autocomplete>
+      <el-autocomplete @select="handleSelect" style="width:200px;" @blur="isShowCity = false" @click.native="displayCity" clearable v-model="city" :fetch-suggestions="querySearch" placeholder="请输入城市" :trigger-on-focus="false"></el-autocomplete>
     </div>
     <!-- 城市选择器 -->
     <div class="city-picker-wraper" v-show="isShowCity" ref="cityRef">
@@ -121,88 +121,92 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.city-picker-wraper {
-  width: 665px;
-  display: inline-block;
-  vertical-align: top;
-  background: #fff;
-  margin-top: 15px;
-  box-shadow: 0 7px 22px -7px rgb(0 0 0 / 34%);
-  position: fixed;
-  z-index: 99;
-  ul {
-    list-style-type: none;
-  }
-  .city-picker-tabs {
-    width: 100%;
-    border-bottom: 1px solid #e6e6e6;
-    height: 55px;
-    line-height: 55px;
-    color: #333;
-    display: flex;
-    justify-content: space-around;
-    li {
-      margin-left: 32px;
-      position: relative;
-      display: inline-block;
-      font-size: 14px;
+.city-container {
+  width: 100%;
+  height: 100%;
+  .city-picker-wraper {
+    width: 665px;
+    display: inline-block;
+    vertical-align: top;
+    background: #fff;
+    margin-top: 15px;
+    box-shadow: 0 7px 22px -7px rgb(0 0 0 / 34%);
+    position: absolute;
+    z-index: 99;
+    ul {
+      list-style-type: none;
+    }
+    .city-picker-tabs {
+      width: 100%;
+      border-bottom: 1px solid #e6e6e6;
       height: 55px;
       line-height: 55px;
-      text-align: left;
-      margin-right: 0;
-    }
-    li:hover {
-      color: #0086f6;
-      font-weight: 500;
-      bottom: -1px;
-      display: block;
-      cursor: pointer;
-    }
-    .active {
-      border-bottom: 2px solid #0086f6;
-      color: #0086f6;
-    }
-  }
-  .city-picker-body {
-    width: 100%;
-    float: left;
-    .cities {
-      padding: 20px 30px 24px 32px;
-      width: 100%;
+      color: #333;
+      display: flex;
+      justify-content: space-around;
       li {
-        padding: 0 2px 0 8px;
-        width: 84px;
-        height: 32px;
-        line-height: 32px;
-        font-size: 14px;
-        color: #333;
-        float: left;
+        margin-left: 32px;
         position: relative;
+        display: inline-block;
+        font-size: 14px;
+        height: 55px;
+        line-height: 55px;
+        text-align: left;
+        margin-right: 0;
       }
       li:hover {
-        cursor: pointer;
         color: #0086f6;
-        border-radius: 4px;
-        background: rgba(0, 134, 246, 0.05);
+        font-weight: 500;
+        bottom: -1px;
+        display: block;
+        cursor: pointer;
+      }
+      .active {
+        border-bottom: 2px solid #0086f6;
+        color: #0086f6;
       }
     }
-    ::v-deep .domestic-city-item:first-child {
-      padding-top: 24px;
-    }
-    .domestic-city-item {
-      padding-left: 32px;
+    .city-picker-body {
       width: 100%;
-      .city-character {
-        width: 26px;
-        display: inline-block;
-        line-height: 32px;
-        vertical-align: top;
-        font-weight: 600;
+      float: left;
+      .cities {
+        padding: 20px 30px 24px 32px;
+        width: 100%;
+        li {
+          padding: 0 2px 0 8px;
+          width: 84px;
+          height: 32px;
+          line-height: 32px;
+          font-size: 14px;
+          color: #333;
+          float: left;
+          position: relative;
+        }
+        li:hover {
+          cursor: pointer;
+          color: #0086f6;
+          border-radius: 4px;
+          background: rgba(0, 134, 246, 0.05);
+        }
       }
-      .domestic-city-content {
-        padding: 0;
-        display: inline-block;
-        width: 598px;
+      ::v-deep .domestic-city-item:first-child {
+        padding-top: 24px;
+      }
+      .domestic-city-item {
+        padding-left: 32px;
+        width: 100%;
+        .city-character {
+          width: 26px;
+          display: inline-block;
+          line-height: 32px;
+          vertical-align: top;
+          font-weight: 600;
+        }
+        .domestic-city-content {
+          padding: 0;
+          display: inline-block;
+          width: 598px;
+        }
       }
     }
   }

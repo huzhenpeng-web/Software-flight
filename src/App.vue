@@ -10,7 +10,9 @@
         </el-header>
         <el-main>
           <!-- 路由占位符 -->
-          <router-view></router-view>
+          <keep-alive include="Reserve">
+            <router-view></router-view>
+          </keep-alive>
         </el-main>
       </el-container>
     </el-container>
@@ -43,11 +45,11 @@ export default {
     height: 100%;
     .el-aside {
       height: 100%;
-      border-right: 1px solid #DADFE6;
+      border-right: 1px solid #dadfe6;
       overflow: hidden;
     }
-    .el-main{
-        background-color: #eef1f6;
+    .el-main {
+      background-color: #eef1f6;
     }
   }
 }

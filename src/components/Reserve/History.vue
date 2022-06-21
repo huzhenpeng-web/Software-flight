@@ -62,6 +62,7 @@ export default {
       this.saveReserveFlight(res)
       this.saveReserveForm(item)
       window.sessionStorage.setItem('reserveFlight', JSON.stringify(res))
+      window.sessionStorage.setItem('reserveForm', JSON.stringify(item))
       this.$router.push('/reserve/selectFlight')
     }
   },
@@ -113,6 +114,9 @@ export default {
           color: #999;
           margin-top: 10px;
         }
+      }
+      li:hover {
+        box-shadow: 0 0 15px rgb(0 0 0 / 20%);
       }
     }
   }

@@ -10,7 +10,7 @@ export default new Vuex.Store({
     // 激活地址
     activePath: '/home',
     // 预订的航班
-    reserveFlight: [],
+    reserveFlight: {},
     // 预订表单
     reserveForm: {},
     // 航班号表单数据

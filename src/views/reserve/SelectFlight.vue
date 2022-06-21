@@ -7,63 +7,78 @@
     </el-breadcrumb>
     <!-- 没有此航班 -->
     <el-empty :description="emptyDescription" v-show="isEmpty"></el-empty>
-    <!-- 城市选择 -->
-    <!-- <div>城市选择</div> -->
     <!-- <div>日期</div> -->
-    <!-- 航班选择 -->
-    <div class="select-flight">
-      <el-card v-for="(item,index) in flightInfo" :key="index">
-        <div class="card">
-          <!-- 左 -->
-          <div class="left">
-            <!-- 航空公司图标 -->
-            <img :src="item.airlineImg" alt="">
-            <!-- 名字 -->
-            <div>
-              {{item.airlineCompanyName}}
-              <span>{{item.flightNo}}</span>
+    <!-- 当前预订类型和日期 -->
+    <div v-show="!isEmpty">
+      <div class="flight-title">
+        <span>单程:</span>
+        <span class="city">{{flightReserveForm.departcureCity}}-{{flightReserveForm.arriveCity}}</span>
+        <span>{{flightReserveForm.departDate | dateFormat}}</span>
+      </div>
+      <!-- 筛选框 -->
+      <Select></Select>
+      <!-- 航班选择 -->
+      <div class="select-flight">
+        <el-card class="select-card" v-for="(item,index) in reserveFlight.data" :key="index" v-loading="loading">
+          <div class="card">
+            <!-- 左 -->
+            <div class="left">
+              <!-- 航空公司图标 -->
+              <img :src="item.airlineImg" alt="">
+              <!-- 名字 -->
+              <div>
+                {{item.airlineCompanyName}}
+                <span>{{item.flightNo}}</span>
+              </div>
+            </div>
+            <!-- 中 -->
+            <div class="medium">
+              <div class="medium-left">
+                <span class="time">{{item.departTime | timeFormat}}</span>
+                <span class="airport">{{item.departPortName}}</span>
+              </div>
+              <div>
+                <img src="@/assets/images/flight/jiantou.png" alt="">
+              </div>
+              <div class="medium-right">
+                <span class="time">{{item.arriveTime | timeFormat}}</span>
+                <span class="airport">{{item.arrivePortName}}</span>
+              </div>
+              <div class="timeRate">到达准点率:{{item.onTimeRate}}</div>
+            </div>
+            <!-- 右 -->
+            <div class="right">
+              <div class="right-left">
+                <span class="price">￥{{item.price}}</span>
+                <span style="color: #0086f6;">起</span>
+              </div>
+              <div class="right-right">
+                <el-button type="warning" @click="bookTicket(item.id)">订票</el-button>
+              </div>
             </div>
           </div>
-          <!-- 中 -->
-          <div class="medium">
-            <div class="medium-left">
-              <span class="time">{{item.departTime | timeFormat}}</span>
-              <span class="airport">{{item.departPortName}}</span>
-            </div>
-            <div>
-              <img src="@/assets/images/flight/jiantou.png" alt="">
-            </div>
-            <div class="medium-right">
-              <span class="time">{{item.arriveTime | timeFormat}}</span>
-              <span class="airport">{{item.arrivePortName}}</span>
-            </div>
-            <div class="timeRate">到达准点率:{{item.onTimeRate}}</div>
-          </div>
-          <!-- 右 -->
-          <div class="right">
-            <div class="right-left">
-              <span class="price">￥{{item.price}}</span>
-              <span style="color: #0086f6;">起</span>
-            </div>
-            <div class="right-right">
-              <el-button type="warning">订票</el-button>
-            </div>
-          </div>
-        </div>
-
-      </el-card>
+        </el-card>
+      </div>
     </div>
+
   </div>
 </template>
 
 <script>
 import { mapState, mapMutations } from 'vuex'
+import Select from '@/components/Reserve/Select.vue'
 export default {
+  components: {
+    Select
+  },
   data () {
     return {
+      // 是否为空
       isEmpty: false,
+      // 空状态描述
       emptyDescription: '',
-      flightInfo: ''
+      flightReserveForm: {},
+      loading: true
     }
   },
   computed: {
@@ -83,17 +98,23 @@ export default {
     readSessionStorage () {
       if (sessionStorage.getItem('reserveFlight')) {
         this.saveReserveFlight(JSON.parse(sessionStorage.getItem('reserveFlight')))
-        this.flightInfo = this.reserveFlight.data
       }
       if (sessionStorage.getItem('reserveForm')) {
         this.saveReserveForm(JSON.parse(sessionStorage.getItem('reserveForm')))
+        this.flightReserveForm = this.reserveForm
       }
+    },
+    // 订票
+    bookTicket (id) {
+      console.log(id)
+      this.$router.push({ path: '/reserve/book', query: { flightId: id } })
     }
   },
   created () {
     this.readSessionStorage()
-    console.log(this.reserveFlight)
+    this.loading = false
     this.showEmpty()
+    console.log(this.reserveFlight)
   }
 }
 </script>
@@ -101,9 +122,22 @@ export default {
 <style lang="less" scoped>
 .selectFlight-container {
   width: 100%;
-  .select-flight {
+  .flight-title {
     margin-top: 30px;
+    font-size: 20px;
+    display: flex;
+    width: 30%;
+    justify-content: space-between;
+    align-items: center;
+    color: #999;
+    .city {
+      color: black;
+      font-size: 30px;
+    }
+  }
+  .select-flight {
     width: 100%;
+    margin-top: 20px;
     .card {
       display: flex;
       justify-content: space-between;
@@ -112,7 +146,7 @@ export default {
         width: 33%;
         display: flex;
         align-items: center;
-        img{
+        img {
           -webkit-user-drag: none;
         }
         div {
@@ -121,7 +155,7 @@ export default {
           flex-direction: column;
           span {
             color: #0086f6;
-            font-size: 8px;
+            font-size: 14px;
           }
         }
       }
@@ -158,12 +192,15 @@ export default {
         }
         .timeRate {
           color: #0086f6;
-          font-size: 8px;
+          font-size: 12px;
         }
         .time {
           font-size: 30px;
         }
       }
+    }
+    .select-card:hover{
+      box-shadow: 0 0 15px rgb(0 0 0 / 20%);
     }
   }
 }
