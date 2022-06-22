@@ -153,7 +153,6 @@ export default {
 <style lang="less" scoped>
 .select-cotainer {
   .condition-select {
-    margin-top: 20px;
     border-radius: 8px 8px 0 0;
     ul {
       width: 100%;

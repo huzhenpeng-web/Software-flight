@@ -44,7 +44,8 @@ import {
   MessageBox,
   Tag,
   OptionGroup,
-  Loading
+  Loading,
+  Link
 } from 'element-ui'
 
 const plugins = [
@@ -90,7 +91,8 @@ const plugins = [
   Empty,
   Tag,
   OptionGroup,
-  Loading
+  Loading,
+  Link
 ]
 
 plugins.forEach(item => {

@@ -6,7 +6,9 @@
       <el-breadcrumb-item>搜航班号</el-breadcrumb-item>
     </el-breadcrumb>
     <!-- 空状态 -->
-    <el-empty description="未查询到航班，请修改条件重新查询" v-show="isShowEmpty"></el-empty>
+    <el-empty description="未查询到航班，请修改条件重新查询" v-show="isShowEmpty">
+      <el-button type="primary" @click="$router.go(-1)">返回</el-button>
+    </el-empty>
     <!-- 航班状态 -->
     <div class="flight-status" v-show="!isShowEmpty">
       <!-- 头部航班信息 -->

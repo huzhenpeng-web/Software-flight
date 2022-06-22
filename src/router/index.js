@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-// import store from '@/store/index'
 import Home from '@/views/home/Home.vue'
 import Flight from '@/views/query/Flight.vue'
 import FlightNo from '@/views/query/FlightNo.vue'
@@ -8,6 +7,7 @@ import Reserve from '@/views/reserve/Reserve.vue'
 import Order from '@/views/order/Order.vue'
 import SelectFlight from '@/views/reserve/SelectFlight.vue'
 import Book from '@/views/reserve/Book.vue'
+import GoBack from '@/views/reserve/GoBack.vue'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
@@ -59,6 +59,12 @@ const routes = [
     component: Book,
     meta: {
       title: '乘机信息'
+    }
+  }, {
+    path: '/reserve/goback',
+    component: GoBack,
+    meta: {
+      title: '选择机票'
     }
   }
 ]

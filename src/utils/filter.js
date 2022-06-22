@@ -4,7 +4,9 @@ import moment from 'moment'
 
 // 时间格式过滤器
 Vue.filter('timeFormat', (val) => {
-  return val.slice(0, 5)
+  if (val) {
+    return val.slice(0, 5)
+  }
 })
 
 // 时间转为周几
@@ -26,5 +28,5 @@ Vue.filter('dateFormat', (val) => {
       week = item[1]
     }
   })
-  return date + '周' + week
+  return date.slice(5, 10) + '周' + week
 })

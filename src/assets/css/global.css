@@ -17,3 +17,7 @@ body {
   fill: currentColor;
   overflow: hidden;
 }
+
+[v-cloak] {
+  display: none !important;
+}

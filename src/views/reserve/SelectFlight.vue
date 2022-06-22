@@ -6,10 +6,11 @@
       <el-breadcrumb-item>选择航班</el-breadcrumb-item>
     </el-breadcrumb>
     <!-- 没有此航班 -->
-    <el-empty :description="emptyDescription" v-show="isEmpty"></el-empty>
-    <!-- <div>日期</div> -->
+    <el-empty :description="emptyDescription" v-show="isEmpty">
+      <el-button type="primary" @click="$router.go(-1)">返回</el-button>
+    </el-empty>
     <!-- 当前预订类型和日期 -->
-    <div v-show="!isEmpty">
+    <div v-if="!isEmpty">
       <div class="flight-title">
         <span>单程:</span>
         <span class="city">{{flightReserveForm.departcureCity}}-{{flightReserveForm.arriveCity}}</span>
@@ -53,14 +54,13 @@
                 <span style="color: #0086f6;">起</span>
               </div>
               <div class="right-right">
-                <el-button type="warning" @click="bookTicket(item.id)">订票</el-button>
+                <el-button type="warning" @click="bookTicket(item)">订票</el-button>
               </div>
             </div>
           </div>
         </el-card>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -105,9 +105,8 @@ export default {
       }
     },
     // 订票
-    bookTicket (id) {
-      console.log(id)
-      this.$router.push({ path: '/reserve/book', query: { flightId: id } })
+    bookTicket (item) {
+      this.$router.push({ path: '/reserve/book', query: { flightId: item.id, flightDate: item.departDate } })
     }
   },
   created () {

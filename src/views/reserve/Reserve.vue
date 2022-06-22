@@ -25,12 +25,12 @@
             <el-form-item label="目的地:" prop="arriveCity">
               <City @transfer="getArriveCity"></City>
             </el-form-item>
-            <el-form-item label="出发日期:" label-position="left">
-              <el-date-picker style="width:200px;" v-model="reserveForm.departcureDate" clearable type="date" value-format="yyyy-MM-dd" placeholder="选择出发日期" :picker-options="pickerOptions1">
+            <el-form-item label="出发日期:" label-position="left" prop="departcureDate">
+              <el-date-picker style="width:180px;" v-model="reserveForm.departcureDate" clearable type="date" value-format="yyyy-MM-dd" placeholder="选择出发日期" :picker-options="pickerOptions1">
               </el-date-picker>
             </el-form-item>
-            <el-form-item label="到达日期:" label-position="left" v-show="radio == 2">
-              <el-date-picker style="width:200px;" v-model="reserveForm.returnDate" clearable type="date" value-format="yyyy-MM-dd" placeholder="选择到达日期" :picker-options="pickerOptions2">
+            <el-form-item label="返回日期:" label-position="left" prop="backDate" v-if="radio == 2">
+              <el-date-picker style="width:180px;" v-model="reserveForm.backDate" clearable type="date" value-format="yyyy-MM-dd" placeholder="选择返回日期" :picker-options="pickerOptions2">
               </el-date-picker>
             </el-form-item>
           </div>
@@ -80,6 +80,7 @@ export default {
     return {
       radio: 1,
       addTripBtn: false,
+      // 单程表单
       reserveForm: {
         // 出发城市
         departcureCity: '',
@@ -87,8 +88,7 @@ export default {
         arriveCity: '',
         // 出发时间
         departcureDate: '',
-        // 返回时间
-        returnDate: ''
+        backDate: ''
       },
       moreReserveForm: {
         // 默认两个
@@ -115,7 +115,7 @@ export default {
       pickerOptions1: {
         // 出行日期
         disabledDate: time => {
-          const endTime = this.reserveForm.returnDate
+          const endTime = this.reserveForm.backDate
           if (endTime) {
             // 如果选择了结束日期 在结束日期之后的都被禁止选择
             return new Date(endTime).getTime() < time.getTime() || time.getTime() < Date.now() - 8.64e7
@@ -153,7 +153,9 @@ export default {
       // 单程和往返表单
       reserveFormRules: {
         departcureCity: [{ required: true, message: '请选择出发地', trigger: ['blur', 'change'] }],
-        arriveCity: [{ required: true, message: '请选择目的地', trigger: ['blur', 'change'] }]
+        arriveCity: [{ required: true, message: '请选择目的地', trigger: ['blur', 'change'] }],
+        departcureDate: [{ required: true, message: '请选择出发时间', trigger: ['blur', 'change'] }],
+        backDate: [{ required: true, message: '请选择返回时间', trigger: ['change', 'blur'] }]
       },
       // 多程
       moreReserveFormRules: {
@@ -190,19 +192,33 @@ export default {
     // 搜索
     async search () {
       if (this.radio !== 3) {
-        this.$refs.reserveFormRef.validate(async valid => {
-          if (!valid) return this.$message.error('请先填写完整对应的信息!')
-          const { data: res } = await flightQuery(this.reserveForm.departcureCity, this.reserveForm.arriveCity, this.reserveForm.departcureDate)
-          // 保留在sessionStorage中
-          window.sessionStorage.setItem('reserveFlight', JSON.stringify(res))
-          window.sessionStorage.setItem('reserveForm', JSON.stringify(this.reserveForm))
-          // 查询成功
-          this.saveReserveFlight(res)
-          this.saveReserveForm(this.reserveForm)
-          // 调用历史记录
-          this.saveHistory(this.reserveForm)
-          this.$router.push('/reserve/selectFlight')
-        })
+        // 单程
+        if (this.radio === 1) {
+          this.$refs.reserveFormRef.validate(async valid => {
+            if (!valid) return this.$message.error('请先填写完整对应的信息!')
+            const { data: res } = await flightQuery(this.reserveForm.departcureCity, this.reserveForm.arriveCity, this.reserveForm.departcureDate)
+            // 保留在sessionStorage中
+            window.sessionStorage.setItem('reserveFlight', JSON.stringify(res))
+            window.sessionStorage.setItem('reserveForm', JSON.stringify(this.reserveForm))
+            // 查询成功
+            this.saveReserveFlight(res)
+            this.saveReserveForm(this.reserveForm)
+            // 调用历史记录
+            this.saveHistory(this.reserveForm)
+            this.$router.push('/reserve/selectFlight')
+          })
+        }
+        // 往返
+        if (this.radio === 2) {
+          this.$refs.reserveFormRef.validate(async valid => {
+            if (!valid) return this.$message.error('请先填写完整对应的信息!')
+            const { data: res } = await flightQuery(this.reserveForm.departcureCity, this.reserveForm.arriveCity, this.reserveForm.departcureDate)
+            this.saveReserveFlight(res)
+            this.saveReserveForm(this.reserveForm)
+            this.saveHistory(this.reserveForm)
+            this.$router.push('/reserve/goback')
+          })
+        }
       } else {
         let count = 0
         let flag = true
@@ -285,7 +301,7 @@ export default {
     width: 1180px;
     margin: 0 auto;
     margin-top: 30px;
-    .el-card{
+    .el-card {
       overflow: unset;
     }
     .el-radio-group {

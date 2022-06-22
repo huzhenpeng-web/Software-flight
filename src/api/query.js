@@ -11,8 +11,16 @@ export function flightQuery (departCity, arriveCity, date) {
 }
 
 // 往返航班查询
+export function goBackQuery (data) {
+  return http.get(`flight/round/${data.flightId}/${data.departureCityName}/${data.arriveCityName}/${data.beforeDate}/${data.afterDate}`)
+}
 
 // 航班号查询
 export function flightNoQuery (flightNo, date) {
   return http.get(`flight/flightId/${flightNo}/${date}`)
+}
+
+// flightId查询
+export function flightIdQuery (data) {
+  return http.get(`flight/id/${data.flightId}/${data.flightDate}`)
 }
