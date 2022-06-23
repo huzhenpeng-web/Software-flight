@@ -34,46 +34,72 @@
       <Select></Select>
       <!-- 出发航班数据 -->
       <div class="go_flight" v-show="isGo">
-        <el-card class="go_card" v-for="(item,index) in reserveFlight.data" :key="index">
-          <div class="card">
-            <!-- 左 -->
-            <div class="left">
-              <!-- 航空公司图标 -->
-              <img :src="item.airlineImg" alt="">
-              <!-- 名字 -->
-              <div>
-                {{item.airlineCompanyName}}
-                <span>{{item.flightNo}}</span>
+        <el-collapse accordion>
+          <el-card class="go_card" v-for="(item,index) in reserveFlight.data" :key="index">
+            <div class="card">
+              <!-- 左 -->
+              <div class="left">
+                <!-- 航空公司图标 -->
+                <el-image :src="item.airlineImg" alt="">
+                  <div slot="placeholder" class="image-slot">
+                    加载中<span class="dot">...</span>
+                  </div>
+                </el-image>
+                <!-- 名字 -->
+                <div>
+                  {{item.airlineCompanyName}}
+                  <span>{{item.flightNo}}</span>
+                </div>
+              </div>
+              <!-- 中 -->
+              <div class="medium">
+                <div class="medium-left">
+                  <span class="time">{{item.departTime | timeFormat}}</span>
+                  <span class="airport">{{item.departPortName}}</span>
+                </div>
+                <div>
+                  <img src="@/assets/images/flight/jiantou.png" alt="">
+                </div>
+                <div class="medium-right">
+                  <span class="time">{{item.arriveTime | timeFormat}}</span>
+                  <span class="airport">{{item.arrivePortName}}</span>
+                </div>
+                <div class="timeRate">到达准点率:{{item.onTimeRate}}</div>
+              </div>
+              <!-- 右 -->
+              <div class="right">
+                <div class="right-left">
+                  <span class="price">￥{{item.price}}</span>
+                  <span style="color: #0086f6;">起</span>
+                  <div>去程价格</div>
+                </div>
+                <div class="right-right">
+                  <el-button type="warning" @click="selectGo(item,index)">选为去程</el-button>
+                </div>
               </div>
             </div>
-            <!-- 中 -->
-            <div class="medium">
-              <div class="medium-left">
-                <span class="time">{{item.departTime | timeFormat}}</span>
-                <span class="airport">{{item.departPortName}}</span>
+            <el-collapse-item @click.native="handleChange(item)" title="查看航班剩余座位">
+              <div v-if="code === 200" class="seat">
+                <el-tag effect="dark">
+                  头等舱:{{ seatInfo.firstSurplus}}张
+                </el-tag>
+                <el-tag effect="dark" type="success">
+                  商务舱:{{ seatInfo.businessSurplus}}张
+                </el-tag>
+                <el-tag effect="dark" type="info">
+                  经济舱:{{ seatInfo.economySurplus}}张
+                </el-tag>
+                <el-tag effect="dark" type="danger">
+                  总座位:{{ seatInfo.countSeat}}
+                </el-tag>
               </div>
-              <div>
-                <img src="@/assets/images/flight/jiantou.png" alt="">
+              <div v-if="code === 500">
+                <el-alert title="购票时间已过" :closable="false" center type="error" effect="dark">
+                </el-alert>
               </div>
-              <div class="medium-right">
-                <span class="time">{{item.arriveTime | timeFormat}}</span>
-                <span class="airport">{{item.arrivePortName}}</span>
-              </div>
-              <div class="timeRate">到达准点率:{{item.onTimeRate}}</div>
-            </div>
-            <!-- 右 -->
-            <div class="right">
-              <div class="right-left">
-                <span class="price">￥{{item.price}}</span>
-                <span style="color: #0086f6;">起</span>
-                <div>去程价格</div>
-              </div>
-              <div class="right-right">
-                <el-button type="warning" @click="selectGo(item,index)">选为去程</el-button>
-              </div>
-            </div>
-          </div>
-        </el-card>
+            </el-collapse-item>
+          </el-card>
+        </el-collapse>
       </div>
       <!-- 返程航班数据 -->
       <div class="go_flight" v-show="isBack">
@@ -86,52 +112,79 @@
               <span style="color:red;">{{flightItem.flightNo}}</span>
               <span>{{flightItem.departDate | dateFormat}}</span>
               <span>{{flightItem.departTime | timeFormat}}-{{flightItem.arriveTime | timeFormat}}</span>
+              <span style="color:red;" v-if="tishiShow">暂无返程航班,请修改去程</span>
             </div>
             <div>
               <el-button type="primary" @click="changeTab(0)">修改去程</el-button>
             </div>
           </div>
         </el-card>
-        <el-card class="go_card" v-for="(item,index) in reserveFlight.data" :key="index">
-          <div class="card">
-            <!-- 左 -->
-            <div class="left">
-              <!-- 航空公司图标 -->
-              <img :src="item.airlineImg" alt="">
-              <!-- 名字 -->
-              <div>
-                {{item.airlineCompanyName}}
-                <span>{{item.flightNo}}</span>
+        <el-collapse accordion>
+          <el-card class="go_card" v-for="(item,index) in reserveFlight.data" :key="index">
+            <div class="card">
+              <!-- 左 -->
+              <div class="left">
+                <!-- 航空公司图标 -->
+                <el-image :src="item.airlineImg">
+                  <div slot="placeholder" class="image-slot">
+                    加载中<span class="dot">...</span>
+                  </div>
+                </el-image>
+                <!-- 名字 -->
+                <div>
+                  {{item.airlineCompanyName}}
+                  <span>{{item.flightNo}}</span>
+                </div>
+              </div>
+              <!-- 中 -->
+              <div class="medium">
+                <div class="medium-left">
+                  <span class="time">{{item.departTime | timeFormat}}</span>
+                  <span class="airport">{{item.departPortName}}</span>
+                </div>
+                <div>
+                  <img src="@/assets/images/flight/jiantou.png" alt="">
+                </div>
+                <div class="medium-right">
+                  <span class="time">{{item.arriveTime | timeFormat}}</span>
+                  <span class="airport">{{item.arrivePortName}}</span>
+                </div>
+                <div class="timeRate">到达准点率:{{item.onTimeRate}}</div>
+              </div>
+              <!-- 右 -->
+              <div class="right">
+                <div class="right-left">
+                  <span class="price">￥{{item.price + price}}</span>
+                  <span style="color: #0086f6;">起</span>
+                  <div>往返总价</div>
+                </div>
+                <div class="right-right">
+                  <el-button type="warning" @click="orderTicket(item)">订票</el-button>
+                </div>
               </div>
             </div>
-            <!-- 中 -->
-            <div class="medium">
-              <div class="medium-left">
-                <span class="time">{{item.departTime | timeFormat}}</span>
-                <span class="airport">{{item.departPortName}}</span>
+            <el-collapse-item @click.native="handleChange(item)">
+              <div v-if="code === 200" class="seat">
+                <el-tag effect="dark">
+                  头等舱:{{ seatInfo.firstSurplus}}张
+                </el-tag>
+                <el-tag effect="dark" type="success">
+                  商务舱:{{ seatInfo.businessSurplus}}张
+                </el-tag>
+                <el-tag effect="dark" type="info">
+                  经济舱:{{ seatInfo.economySurplus}}张
+                </el-tag>
+                <el-tag effect="dark" type="danger">
+                  总座位:{{ seatInfo.countSeat}}
+                </el-tag>
               </div>
-              <div>
-                <img src="@/assets/images/flight/jiantou.png" alt="">
+              <div v-if="code === 500">
+                <el-alert title="购票时间已过" :closable="false" center type="error" effect="dark">
+                </el-alert>
               </div>
-              <div class="medium-right">
-                <span class="time">{{item.arriveTime | timeFormat}}</span>
-                <span class="airport">{{item.arrivePortName}}</span>
-              </div>
-              <div class="timeRate">到达准点率:{{item.onTimeRate}}</div>
-            </div>
-            <!-- 右 -->
-            <div class="right">
-              <div class="right-left">
-                <span class="price">￥{{item.price + price}}</span>
-                <span style="color: #0086f6;">起</span>
-                <div>往返总价</div>
-              </div>
-              <div class="right-right">
-                <el-button type="warning" @click="orderTicket(item)">订票</el-button>
-              </div>
-            </div>
-          </div>
-        </el-card>
+            </el-collapse-item>
+          </el-card>
+        </el-collapse>
       </div>
     </div>
     <!-- 没有此航班 -->
@@ -144,7 +197,8 @@
 <script>
 import { mapState, mapMutations } from 'vuex'
 import Select from '@/components/Reserve/Select.vue'
-import { goBackQuery, flightIdQuery } from '@/api/query.js'
+import { goBackQuery, flightQuery } from '@/api/query.js'
+import { getSeat } from '@/api/ticket'
 export default {
   components: {
     Select
@@ -165,31 +219,41 @@ export default {
       // 按钮样式
       // buttonType: [],
       // 选择去程的数据
-      flightItem: {}
+      flightItem: {},
+      seatInfo: [],
+      code: 0,
+      tishiShow: false
     }
   },
   methods: {
     ...mapMutations(['saveReserveForm', 'saveReserveFlight']),
     // 判断是否为空
-    showEmpty () {
-      if (this.reserveFlight.resultCode !== 200) {
+    async showEmpty () {
+      // 取出路径参数
+      const { data: res } = await flightQuery(this.$route.query.depart, this.$route.query.arrive, this.$route.query.date)
+      if (res.resultCode !== 200) {
         this.isEmpty = true
         this.emptyDescription = `您查询的 ${this.reserveForm.departcureCity} 至
         ${this.reserveForm.arriveCity}（出发日期：${this.reserveForm.departcureDate}） 的机票可能因无航班或航班座位已售完导致暂时无法查询到对应价格。 建议您更换旅行日期或旅行城市重新查询`
       }
+      this.saveReserveFlight(res)
+      window.sessionStorage.setItem('reserveFlight', JSON.stringify(res))
     },
     // 选择去程并查询返程的数据
-    async selectGo (item, index) {
+    async selectGo (item) {
+      const { data: results } = await getSeat(item.id, item.departDate)
+      if (results.resultCode === 500) return this.$message.error('买票时间已过,请重新选择')
       this.flightItem = item
       this.price = item.price
       const flightInfo = {
         flightId: item.id,
-        departureCityName: this.reserveForm.departcureCity,
-        arriveCityName: this.reserveForm.arriveCity,
+        arriveCityName: this.reserveForm.departcureCity,
+        departureCityName: this.reserveForm.arriveCity,
         beforeDate: this.reserveForm.departcureDate,
         afterDate: this.reserveForm.backDate
       }
       const { data: res } = await goBackQuery(flightInfo)
+      if (res.data.length === 0) this.tishiShow = true
       if (res.resultCode === 200) {
         // 复制去程数据
         window.sessionStorage.setItem('reserveFlightCopy', JSON.stringify(this.reserveFlight))
@@ -197,6 +261,7 @@ export default {
         this.saveReserveFlight(res)
         // 复制返程数据
         window.sessionStorage.setItem('reserveFlightCopy2', JSON.stringify(res))
+        window.sessionStorage.setItem('reserveFlight', JSON.stringify(res))
         this.isActive = true
         this.isGo = false
         this.isBack = true
@@ -205,12 +270,16 @@ export default {
         this.buttonType[index].content = '已选去程'
         this.buttonType[index].type = 'success' */
       }
+      if (res.resultCode === 500) {
+        return this.$message.info('查询不到返程航班,请更换航班')
+      }
     },
     // 切换tab
     changeTab (index) {
       if (index === 0) {
         // 切换去程数据
         this.saveReserveFlight(JSON.parse(sessionStorage.getItem('reserveFlightCopy')))
+        window.sessionStorage.setItem('reserveFlight', JSON.stringify(this.reserveFlight))
         this.isGo = true
         this.isBack = false
         this.isActive = false
@@ -218,26 +287,27 @@ export default {
       if (index === 1) {
         if (this.flag === false) return this.$message.warning('请先选择去程航班')
         this.saveReserveFlight(JSON.parse(sessionStorage.getItem('reserveFlightCopy2')))
+        window.sessionStorage.setItem('reserveFlight', JSON.stringify(this.reserveFlight))
         this.isGo = false
         this.isBack = true
       }
     },
     // 订票
     async orderTicket (item) {
-      // 查询返程数据
-      const backData = {
-        flightId: item.id,
-        flightDate: this.reserveForm.backDate
+      const { data: results } = await getSeat(item.id, item.departDate)
+      if (results.resultCode === 500) return this.$message.error('买票时间已过,请重新选择')
+      const path = {
+        depart: this.$route.query.depart,
+        arrive: this.$route.query.arrive,
+        date: this.$route.query.date
       }
-      const { data: res } = await flightIdQuery(backData)
-      console.log(res)
-      // 查询去程数据
-      const goData = {
-        flightId: this.flightItem.id,
-        flightDate: this.reserveForm.departcureDate
-      }
-      const { data: result } = await flightIdQuery(goData)
-      console.log(result)
+      localStorage.setItem('goBackPath', JSON.stringify(path))
+      this.$router.push(`/reserve/goback/book?goflightid=${this.flightItem.id}&goflightdate=${this.reserveForm.departcureDate}&backflightid=${item.id}&backflightDate=${this.reserveForm.backDate}`)
+    },
+    async handleChange (item) {
+      const { data: res } = await getSeat(item.id, item.departDate)
+      this.code = res.resultCode
+      this.seatInfo = res.data
     }
   },
   computed: {
@@ -248,7 +318,6 @@ export default {
       const vuexData = JSON.parse(sessionStorage.getItem('vuex'))
       // 从sessionStorage中赋值
       this.saveReserveForm(vuexData.reserveForm)
-      this.saveReserveFlight(vuexData.reserveFlight)
       /*       this.reserveFlight.data.forEach(item => {
         this.buttonType.push({ type: 'warning', content: '选为去程' })
       }) */
@@ -410,5 +479,10 @@ export default {
       }
     }
   }
+}
+.seat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

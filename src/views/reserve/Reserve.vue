@@ -196,27 +196,22 @@ export default {
         if (this.radio === 1) {
           this.$refs.reserveFormRef.validate(async valid => {
             if (!valid) return this.$message.error('请先填写完整对应的信息!')
-            const { data: res } = await flightQuery(this.reserveForm.departcureCity, this.reserveForm.arriveCity, this.reserveForm.departcureDate)
             // 保留在sessionStorage中
-            window.sessionStorage.setItem('reserveFlight', JSON.stringify(res))
             window.sessionStorage.setItem('reserveForm', JSON.stringify(this.reserveForm))
             // 查询成功
-            this.saveReserveFlight(res)
             this.saveReserveForm(this.reserveForm)
             // 调用历史记录
             this.saveHistory(this.reserveForm)
-            this.$router.push('/reserve/selectFlight')
+            this.$router.push(`/reserve/selectFlight?depart=${this.reserveForm.departcureCity}&arrive=${this.reserveForm.arriveCity}&date=${this.reserveForm.departcureDate}`)
           })
         }
         // 往返
         if (this.radio === 2) {
           this.$refs.reserveFormRef.validate(async valid => {
             if (!valid) return this.$message.error('请先填写完整对应的信息!')
-            const { data: res } = await flightQuery(this.reserveForm.departcureCity, this.reserveForm.arriveCity, this.reserveForm.departcureDate)
-            this.saveReserveFlight(res)
             this.saveReserveForm(this.reserveForm)
             this.saveHistory(this.reserveForm)
-            this.$router.push('/reserve/goback')
+            this.$router.push(`/reserve/goback?depart=${this.reserveForm.departcureCity}&arrive=${this.reserveForm.arriveCity}&date=${this.reserveForm.departcureDate}`)
           })
         }
       } else {

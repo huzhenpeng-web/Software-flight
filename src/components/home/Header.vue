@@ -34,19 +34,19 @@ export default {}
       margin-right: 20px;
     }
   }
-  .header-right{
+  .header-right {
     width: 80px;
     font-size: 15px;
-    background-color:#f2f8fe;
-    border-radius:16px 16px 16px 16px;
+    background-color: #f2f8fe;
+    border-radius: 16px 16px 16px 16px;
     cursor: pointer;
-    .icon{
+    .icon {
       width: 30px;
       height: 20px;
     }
   }
-  .header-right:hover{
-    color: blue;
+  .header-right:hover {
+    color: #409eff;
   }
 }
 </style>

@@ -29,7 +29,6 @@
 
 <script>
 import { mapMutations } from 'vuex'
-import { flightQuery } from '@/api/query'
 export default {
   data () {
     return {
@@ -58,12 +57,13 @@ export default {
     },
     // 跳转到选择机票页面
     async toSelectFlight (item) {
-      const { data: res } = await flightQuery(item.departcureCity, item.arriveCity, item.departcureDate)
-      this.saveReserveFlight(res)
-      this.saveReserveForm(item)
-      window.sessionStorage.setItem('reserveFlight', JSON.stringify(res))
-      window.sessionStorage.setItem('reserveForm', JSON.stringify(item))
-      this.$router.push('/reserve/selectFlight')
+      try {
+        this.saveReserveForm(item)
+        window.sessionStorage.setItem('reserveForm', JSON.stringify(item))
+        this.$router.push(`/reserve/selectFlight?depart=${item.departcureCity}&arrive=${item.arriveCity}&date=${item.departcureDate}`)
+      } catch (e) {
+        this.$message.error('发起请求失败')
+      }
     }
   },
   mounted () {

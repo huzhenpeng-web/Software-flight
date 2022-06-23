@@ -6,7 +6,7 @@
       <el-breadcrumb-item>选择航班</el-breadcrumb-item>
     </el-breadcrumb>
     <!-- 没有此航班 -->
-    <el-empty :description="emptyDescription" v-show="isEmpty">
+    <el-empty :description="emptyDescription" v-if="isEmpty">
       <el-button type="primary" @click="$router.go(-1)">返回</el-button>
     </el-empty>
     <!-- 当前预订类型和日期 -->
@@ -20,45 +20,71 @@
       <Select></Select>
       <!-- 航班选择 -->
       <div class="select-flight">
-        <el-card class="select-card" v-for="(item,index) in reserveFlight.data" :key="index" v-loading="loading">
-          <div class="card">
-            <!-- 左 -->
-            <div class="left">
-              <!-- 航空公司图标 -->
-              <img :src="item.airlineImg" alt="">
-              <!-- 名字 -->
-              <div>
-                {{item.airlineCompanyName}}
-                <span>{{item.flightNo}}</span>
+        <el-collapse accordion>
+          <el-card class="select-card" v-for="(item,index) in reserveFlight.data" :key="index" v-loading="loading">
+            <div class="card">
+              <!-- 左 -->
+              <div class="left">
+                <!-- 航空公司图标 -->
+                <el-image :src="item.airlineImg" alt="">
+                  <div slot="placeholder" class="image-slot">
+                    加载中<span class="dot">...</span>
+                  </div>
+                </el-image>
+                <!-- 名字 -->
+                <div>
+                  {{item.airlineCompanyName}}
+                  <span>{{item.flightNo}}</span>
+                </div>
+              </div>
+              <!-- 中 -->
+              <div class="medium">
+                <div class="medium-left">
+                  <span class="time">{{item.departTime | timeFormat}}</span>
+                  <span class="airport">{{item.departPortName}}</span>
+                </div>
+                <div>
+                  <img src="@/assets/images/flight/jiantou.png" alt="">
+                </div>
+                <div class="medium-right">
+                  <span class="time">{{item.arriveTime | timeFormat}}</span>
+                  <span class="airport">{{item.arrivePortName}}</span>
+                </div>
+                <div class="timeRate">到达准点率:{{item.onTimeRate}}</div>
+              </div>
+              <!-- 右 -->
+              <div class="right">
+                <div class="right-left">
+                  <span class="price">￥{{item.price}}</span>
+                  <span style="color: #0086f6;">起</span>
+                </div>
+                <div class="right-right">
+                  <el-button type="warning" @click="bookTicket(item)">订票</el-button>
+                </div>
               </div>
             </div>
-            <!-- 中 -->
-            <div class="medium">
-              <div class="medium-left">
-                <span class="time">{{item.departTime | timeFormat}}</span>
-                <span class="airport">{{item.departPortName}}</span>
+            <el-collapse-item @click.native="handleChange(item)" title="查看航班剩余座位">
+              <div v-if="code === 200" class="seat">
+                <el-tag effect="dark">
+                  头等舱:{{ seatInfo.firstSurplus}}张
+                </el-tag>
+                <el-tag effect="dark" type="success">
+                  商务舱:{{ seatInfo.businessSurplus}}张
+                </el-tag>
+                <el-tag effect="dark" type="info">
+                  经济舱:{{ seatInfo.economySurplus}}张
+                </el-tag>
+                <el-tag effect="dark" type="danger">
+                  总座位:{{ seatInfo.countSeat}}
+                </el-tag>
               </div>
-              <div>
-                <img src="@/assets/images/flight/jiantou.png" alt="">
+              <div v-if="code === 500">
+                <el-alert title="购票时间已过" :closable="false" center type="error" effect="dark">
+                </el-alert>
               </div>
-              <div class="medium-right">
-                <span class="time">{{item.arriveTime | timeFormat}}</span>
-                <span class="airport">{{item.arrivePortName}}</span>
-              </div>
-              <div class="timeRate">到达准点率:{{item.onTimeRate}}</div>
-            </div>
-            <!-- 右 -->
-            <div class="right">
-              <div class="right-left">
-                <span class="price">￥{{item.price}}</span>
-                <span style="color: #0086f6;">起</span>
-              </div>
-              <div class="right-right">
-                <el-button type="warning" @click="bookTicket(item)">订票</el-button>
-              </div>
-            </div>
-          </div>
-        </el-card>
+            </el-collapse-item>
+          </el-card>
+        </el-collapse>
       </div>
     </div>
   </div>
@@ -66,6 +92,8 @@
 
 <script>
 import { mapState, mapMutations } from 'vuex'
+import { flightQuery } from '@/api/query'
+import { getSeat } from '@/api/ticket'
 import Select from '@/components/Reserve/Select.vue'
 export default {
   components: {
@@ -78,7 +106,14 @@ export default {
       // 空状态描述
       emptyDescription: '',
       flightReserveForm: {},
-      loading: true
+      loading: true,
+      path: {
+        depart: '',
+        arrive: '',
+        date: ''
+      },
+      seatInfo: [],
+      code: 0
     }
   },
   computed: {
@@ -87,7 +122,10 @@ export default {
   methods: {
     ...mapMutations(['saveReserveFlight', 'saveReserveForm']),
     // 是否显示空状态
-    showEmpty () {
+    async showEmpty () {
+      const { data: res } = await flightQuery(this.$route.query.depart, this.$route.query.arrive, this.$route.query.date)
+      window.sessionStorage.setItem('reserveFlight', JSON.stringify(res))
+      this.saveReserveFlight(res)
       if (this.reserveFlight.resultCode !== 200) {
         this.isEmpty = true
         this.emptyDescription = `您查询的 ${this.reserveForm.departcureCity} 至
@@ -105,15 +143,31 @@ export default {
       }
     },
     // 订票
-    bookTicket (item) {
+    async bookTicket (item) {
+      const { data: res } = await getSeat(item.id, item.departDate)
+      console.log(res)
+      if (res.resultCode === 500) {
+        return this.$message.error('此航班无位置或时间已过,请选择其他航班')
+      }
       this.$router.push({ path: '/reserve/book', query: { flightId: item.id, flightDate: item.departDate } })
+    },
+    async handleChange (item) {
+      const { data: res } = await getSeat(item.id, item.departDate)
+      this.code = res.resultCode
+      this.seatInfo = res.data
     }
   },
   created () {
     this.readSessionStorage()
     this.loading = false
     this.showEmpty()
-    console.log(this.reserveFlight)
+  },
+  mounted () {
+    // 保存当前路径的参数
+    this.path.depart = this.$route.query.depart
+    this.path.arrive = this.$route.query.arrive
+    this.path.date = this.$route.query.date
+    localStorage.setItem('path', JSON.stringify(this.path))
   }
 }
 </script>
@@ -198,8 +252,13 @@ export default {
         }
       }
     }
-    .select-card:hover{
+    .select-card:hover {
       box-shadow: 0 0 15px rgb(0 0 0 / 20%);
+    }
+    .seat {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
   }
 }

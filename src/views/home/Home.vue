@@ -3,7 +3,7 @@
     <el-carousel :interval="4000" type="card" height="400px">
       <el-carousel-item v-for="item in carouselImgs" :key="item.url">
         <a href="#">
-          <img :src="item.url" width="100%" height="100%">
+          <img :src="item.url" width="100%" height="100%" />
         </a>
       </el-carousel-item>
     </el-carousel>

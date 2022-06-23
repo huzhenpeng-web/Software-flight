@@ -143,9 +143,18 @@ export default {
     ...mapState(['reserveFlight'])
   },
   created () {
-    this.flight = this.reserveFlight
-    this.getflightCompany()
-    this.getFlightPort()
+    if (this.reserveFlight.resultCode !== 500) {
+      this.flight = this.reserveFlight
+      this.$nextTick(() => {
+        this.getflightCompany()
+        this.getFlightPort()
+      })
+    }
+  },
+  watch: {
+    reserveFlight () {
+      this.flight = this.reserveFlight
+    }
   }
 }
 </script>

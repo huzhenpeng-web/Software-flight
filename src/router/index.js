@@ -7,7 +7,9 @@ import Reserve from '@/views/reserve/Reserve.vue'
 import Order from '@/views/order/Order.vue'
 import SelectFlight from '@/views/reserve/SelectFlight.vue'
 import Book from '@/views/reserve/Book.vue'
-import GoBack from '@/views/reserve/GoBack.vue'
+import GoBack from '@/views/reserve/GoBack/GoBack.vue'
+import GbBook from '@/views/reserve/GoBack/GbBook.vue'
+import Service from '@/views/reserve/Service.vue'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
@@ -65,6 +67,18 @@ const routes = [
     component: GoBack,
     meta: {
       title: '选择机票'
+    }
+  }, {
+    path: '/reserve/goback/book',
+    component: GbBook,
+    meta: {
+      title: '乘机信息'
+    }
+  }, {
+    path: '/reserve/service',
+    component: Service,
+    meta: {
+      title: '增值服务'
     }
   }
 ]

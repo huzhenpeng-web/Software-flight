@@ -4,7 +4,7 @@
     <!-- 面包屑 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/reserve' }">机票预定</el-breadcrumb-item>
-      <el-breadcrumb-item :to="{ path: '/reserve/selectFlight' }">选择航班</el-breadcrumb-item>
+      <el-breadcrumb-item :to="{ path: `/reserve/selectFlight?depart=${path.depart}&arrive=${path.arrive}&date=${path.date}` }">选择航班</el-breadcrumb-item>
       <el-breadcrumb-item>填写信息</el-breadcrumb-item>
     </el-breadcrumb>
     <!-- 步骤条 -->
@@ -40,6 +40,9 @@
               </el-link>
             </div>
           </el-card>
+          <div class="rightButton">
+            <el-button type="primary" @click="logPassenger">下一步</el-button>
+          </div>
         </div>
       </div>
       <!-- 右 -->
@@ -61,6 +64,7 @@
                 <span>{{resultData.airlineCompanyName}}</span>
               </span>
               <span>{{resultData.flightNo}}</span>
+              <span>经济舱</span>
             </div>
             <div class="top-bottom">
               <div class="topDiv">
@@ -80,21 +84,40 @@
               </div>
             </div>
           </div>
+          <div class="ticket-price">
+            <div>
+              <span>成人:</span>
+              <span>
+                ￥{{resultData.price - ticketPrice.luggage - ticketPrice.tax}} x {{PassengerArr.length}}
+              </span>
+            </div>
+            <div>
+              <span>行李:</span>
+              <span>
+                ￥{{ticketPrice.luggage}} x {{PassengerArr.length}}
+              </span>
+            </div>
+            <div>
+              <span>燃油税:</span>
+              <span>
+                ￥{{ticketPrice.tax}} x {{PassengerArr.length}}
+              </span>
+            </div>
+          </div>
           <!-- 下 -->
           <div class="bottom">
             <div>￥{{resultData.price * this.PassengerArr.length}}</div>
           </div>
         </div>
       </div>
-      <div class="rightButton">
-        <el-button type="primary" @click="logPassenger">下一步</el-button>
-      </div>
+
     </div>
   </div>
 </template>
 
 <script>
 import { flightIdQuery } from '@/api/query'
+import { ticketPrice } from '@/api/ticket'
 import Passenger from '@/components/Reserve/Passenger.vue'
 import { mapState, mapMutations } from 'vuex'
 export default {
@@ -115,7 +138,14 @@ export default {
         }
       ],
       // 添加乘客状态
-      linkDisabled: false
+      linkDisabled: false,
+      // 票价规则
+      ticketPrice: {},
+      path: {
+        depart: '',
+        arrive: '',
+        date: ''
+      }
     }
   },
   methods: {
@@ -128,7 +158,6 @@ export default {
       }
       this.resultData = res.data
       this.description1 = '出行提醒: ' + `抵达${this.resultData.arriveCityName}提醒· ` + ` ${this.resultData.departureCityName}出港提醒`
-      console.log(res)
     },
     // 添加乘客数量
     addPassenger () {
@@ -141,17 +170,25 @@ export default {
     },
     // 打印乘客信息
     logPassenger () {
-      if (this.passengerInfo.length === 0) {
-        return this.$message.info('请填写完整的乘客信息')
-      }
+      if (this.passengerInfo.length === 0 || this.passengerInfo.length !== this.PassengerArr.length) return this.$message.info('乘机人信息填写不完整!')
       console.log(this.passengerInfo)
-      this.savePassengereInfo([])
+    },
+    // 获取票价规则
+    async getTicket () {
+      const { data: res } = await ticketPrice()
+      this.ticketPrice = res.data
+      console.log(res)
     }
   },
   created () {
     // 取出路由中携带的参数
     this.pathInfo = this.$route.query
     this.getFlightInfo()
+    this.getTicket()
+  },
+  mounted () {
+    // 获取路径参数
+    this.path = JSON.parse(localStorage.getItem('path'))
   },
   computed: {
     ...mapState(['passengerInfo'])
@@ -189,6 +226,13 @@ export default {
       }
       .cardDiv {
         margin-top: 30px;
+        .rightButton {
+          margin-top: 30px;
+          width: 100%;
+          .el-button {
+            width: 100%;
+          }
+        }
         .addPassengerDiv {
           margin-top: 15px;
           text-align: center;
@@ -204,8 +248,8 @@ export default {
       }
     }
     .right {
-      width: 50%;
-      height: 30%;
+      width: 30%;
+      height: 50%;
       position: fixed;
       right: 50px;
       .right-box {
@@ -283,15 +327,18 @@ export default {
             float: right;
           }
         }
-      }
-    }
-    .rightButton {
-      position: fixed;
-      right: 50px;
-      top: 500px;
-      width: 398px;
-      .el-button {
-        width: 100%;
+        .ticket-price {
+          border-bottom: 1px dashed #b4c4d6;
+          div{
+            display: flex;
+            align-items: center;
+            height: 25px;
+            justify-content: space-between;
+            span{
+              padding: 0 30px;
+            }
+          }
+        }
       }
     }
   }

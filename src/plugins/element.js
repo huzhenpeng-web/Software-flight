@@ -45,7 +45,10 @@ import {
   Tag,
   OptionGroup,
   Loading,
-  Link
+  Link,
+  Collapse,
+  CollapseItem,
+  Image
 } from 'element-ui'
 
 const plugins = [
@@ -92,7 +95,10 @@ const plugins = [
   Tag,
   OptionGroup,
   Loading,
-  Link
+  Link,
+  Collapse,
+  CollapseItem,
+  Image
 ]
 
 plugins.forEach(item => {

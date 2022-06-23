@@ -19,7 +19,7 @@
             <el-input @blur="handleGetAge" clearable v-model="passengerForm.idCard" placeholder="登记证件号码"></el-input>
           </el-form-item>
           <el-form-item prop="phone">
-            <el-input @blur="handleBlur" v-model="passengerForm.phone" placeholder="乘机人手机号码" clearable></el-input>
+            <el-input v-model="passengerForm.phone" placeholder="乘机人手机号码" clearable></el-input>
           </el-form-item>
         </el-form>
       </div>
@@ -83,28 +83,36 @@ export default {
   },
   methods: {
     ...mapMutations(['savePassengereInfo']),
-    // 处理失去焦点
-    handleBlur () {
-      this.$refs.passengerFormRef.validate(val => {
-        if (!val) return this.$message.info('请填写完整的信息')
-        // 通过验证传乘客信息
-        this.savePassengereInfo(this.passengerForm)
-      })
-    },
     // 获得年龄
     handleGetAge () {
-      this.isOpenImg = true
       const age = getAge(this.passengerForm.idCard)
       if (age >= 18) { // 成人
+        this.isOpenImg = true
         this.img = this.imgUrl[0]
         this.person = this.personArr[0]
       } else if (age > 3 && age < 18) {
+        this.isOpenImg = true
         this.img = this.imgUrl[1]
         this.person = this.personArr[1]
-      } else {
+      } else if (age > 0 && age <= 3) {
+        this.isOpenImg = true
         this.img = this.imgUrl[2]
         this.person = this.personArr[2]
       }
+    }
+  },
+  watch: {
+    passengerForm: {
+      handler (newVal) {
+        if (newVal.name === '' || newVal.idCard === '' || newVal.phone === '') return
+        this.$refs.passengerFormRef.validate(val => {
+          if (!val) return
+          // 通过验证传乘客信息
+          this.savePassengereInfo(this.passengerForm)
+        })
+      },
+      deep: true,
+      immediate: true
     }
   }
 }
