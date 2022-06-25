@@ -1,14 +1,17 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
+import { removeDuplicates } from '@/utils/remove'
 
 Vue.use(Vuex)
-const PERSIST_PATHS = ['activeStep', 'reserveForm', 'reserveFlight']
+const PERSIST_PATHS = ['activeStep', 'reserveForm', 'reserveFlight', 'isCollapse']
 
 export default new Vuex.Store({
   state: {
     // 是否折叠菜单栏
     isCollapse: false,
+    // 是否显示登录面板
+    isLoginDialog: false,
     // 激活地址
     activePath: '/home',
     // 激活的步骤条
@@ -42,6 +45,14 @@ export default new Vuex.Store({
     },
     savePassengereInfo (state, value) {
       state.passengerInfo.push(value)
+      removeDuplicates(state.passengerInfo)
+    },
+    saveIsLoginDialog (state, value) {
+      state.isLoginDialog = value
+    },
+    // 移出乘客
+    deletePassengereInfo (state, index) {
+      state.passengerInfo.splice(index, 1)
     }
   },
   actions: {

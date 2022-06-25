@@ -9,16 +9,26 @@
     </div>
     <!-- 右侧 -->
     <div class="header-right">
-      <svg class="icon" aria-hidden="true">
-        <use xlink:href="#icon-yonghu"></use>
-      </svg>
-      <span>请登录</span>
+      <div @click="login">
+        <svg class="icon" aria-hidden="true">
+          <use xlink:href="#icon-yonghu"></use>
+        </svg>
+        <span>请登录</span>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-export default {}
+import { mapMutations } from 'vuex'
+export default {
+  methods: {
+    ...mapMutations(['saveIsLoginDialog']),
+    login () {
+      this.saveIsLoginDialog(true)
+    }
+  }
+}
 </script>
 
 <style lang="less" scoped>

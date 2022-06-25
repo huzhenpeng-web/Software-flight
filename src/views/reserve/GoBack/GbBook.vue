@@ -42,7 +42,7 @@
           </el-card>
         </div>
         <div class="right-button">
-          <el-button type="primary" @click="logPassenger">下一步</el-button>
+          <el-button type="primary" @click="submitPassenger">下一步</el-button>
         </div>
       </div>
       <!-- 右 -->
@@ -162,7 +162,8 @@
 <script>
 import Passenger from '@/components/Reserve/Passenger.vue'
 import { flightIdQuery } from '@/api/query'
-import { ticketPrice } from '@/api/ticket'
+import { ticketPrice, orderTicket } from '@/api/ticket'
+import { mapState, mapMutations } from 'vuex'
 export default {
   components: {
     Passenger
@@ -199,6 +200,7 @@ export default {
     }
   },
   methods: {
+    ...mapMutations(['deletePassengereInfo']),
     // 查询航班数据
     async queryFlightData () {
       // 获取路径参数
@@ -226,12 +228,52 @@ export default {
     // 减少乘客
     removePassenger (index) {
       this.PassengerArr.splice(index, 1)
+      this.deletePassengereInfo(index)
     },
-    // 打印乘客信息
-    logPassenger () {
-      console.log()
+    // 提交乘客信息
+    async submitPassenger () {
       if (this.passengerInfo.length === 0 || this.passengerInfo.length !== this.PassengerArr.length) return this.$message.info('乘机人信息填写不完整!')
       console.log(this.passengerInfo)
+      const passengerObj = {
+        userId: '1',
+        orderFlightDto: [
+          {
+            departDate: this.goData.flightDate,
+            flightId: this.goData.flightId,
+            // 飞机票基础价格
+            ticketSalePrice: this.goFlight.price,
+            // 燃油税
+            taxFee: this.ticket.tax,
+            dayDiscount: this.ticket.todayPrice,
+            seatPrice: this.ticket.economyClass,
+            ticketTypePrice: 0,
+            // 行李费
+            luggagePrice: this.ticket.luggage
+          }, {
+            departDate: this.backData.flightDate,
+            flightId: this.backData.flightId,
+            // 飞机票基础价格
+            ticketSalePrice: this.backFlight.price,
+            // 燃油税
+            taxFee: this.ticket.tax,
+            dayDiscount: this.ticket.todayPrice,
+            seatPrice: this.ticket.economyClass,
+            ticketTypePrice: 0,
+            // 行李费
+            luggagePrice: this.ticket.luggage
+          }
+        ],
+        passengerDto: this.passengerInfo,
+        tripType: 1
+      }
+      const { data: res } = await orderTicket(passengerObj)
+      // 锁定座位成功 进入下一个页面
+      // if(res.resultCode === 200) return this
+      if (res.resultCode === 500) {
+        this.$message.error('已没有剩余票数,请重新选择航班。')
+        return this.$router.push('/reserve')
+      }
+      console.log(res)
     },
     // 获取票价规则
     async getTicket () {
@@ -245,6 +287,9 @@ export default {
   },
   mounted () {
     this.getTicket()
+  },
+  computed: {
+    ...mapState(['passengerInfo'])
   }
 }
 </script>

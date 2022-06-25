@@ -14,8 +14,12 @@ export function ticketPrice () {
   return api.get('ticket/price/info')
 }
 
-// @GetMapping(value = {"/info/{id}/{date}","/info/{id}"})
 // 获取座位数
 export function getSeat (id, date) {
   return api.get(`ticket/info/${id}/${date}`)
+}
+
+// 订票
+export function orderTicket (data) {
+  return api.post('ticket/robTicket', JSON.stringify(data))
 }

@@ -48,7 +48,8 @@ import {
   Link,
   Collapse,
   CollapseItem,
-  Image
+  Image,
+  Dialog
 } from 'element-ui'
 
 const plugins = [
@@ -98,7 +99,8 @@ const plugins = [
   Link,
   Collapse,
   CollapseItem,
-  Image
+  Image,
+  Dialog
 ]
 
 plugins.forEach(item => {

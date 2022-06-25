@@ -41,7 +41,7 @@
             </div>
           </el-card>
           <div class="rightButton">
-            <el-button type="primary" @click="logPassenger">下一步</el-button>
+            <el-button type="primary" @click="commitPassenger">下一步</el-button>
           </div>
         </div>
       </div>
@@ -117,10 +117,11 @@
 
 <script>
 import { flightIdQuery } from '@/api/query'
-import { ticketPrice } from '@/api/ticket'
+import { ticketPrice, orderTicket } from '@/api/ticket'
 import Passenger from '@/components/Reserve/Passenger.vue'
 import { mapState, mapMutations } from 'vuex'
 export default {
+  name: 'Book',
   components: {
     Passenger
   },
@@ -149,7 +150,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['savePassengereInfo']),
+    ...mapMutations(['savePassengereInfo', 'deletePassengereInfo']),
     // 查询航班信息
     async getFlightInfo () {
       const { data: res } = await flightIdQuery(this.pathInfo)
@@ -167,11 +168,38 @@ export default {
     // 减少乘客
     removePassenger (index) {
       this.PassengerArr.splice(index, 1)
+      this.deletePassengereInfo(index)
     },
-    // 打印乘客信息
-    logPassenger () {
+    // 下一步 提交乘客信息
+    async commitPassenger () {
       if (this.passengerInfo.length === 0 || this.passengerInfo.length !== this.PassengerArr.length) return this.$message.info('乘机人信息填写不完整!')
-      console.log(this.passengerInfo)
+      const passengerObj = {
+        userId: '1',
+        orderFlightDto: [{
+          departDate: this.pathInfo.flightDate,
+          flightId: this.pathInfo.flightId,
+          // 飞机票基础价格
+          ticketSalePrice: this.resultData.price,
+          // 燃油税
+          taxFee: this.ticketPrice.tax,
+          dayDiscount: this.ticketPrice.todayPrice,
+          seatPrice: this.ticketPrice.economyClass,
+          ticketTypePrice: 0,
+          // 行李费
+          luggagePrice: this.ticketPrice.luggage
+        }],
+        passengerDto: this.passengerInfo,
+        tripType: 0
+      }
+      const { data: res } = await orderTicket(passengerObj)
+      // 成功 进入下一个页面
+      // if (res.resultCode === 200) return
+      // 失败 让顾客重新选择航班
+      if (res.resultCode === 500) {
+        this.$message.error('已没有剩余票数,请重新选择航班。')
+        return this.$router.push('/reserve')
+      }
+      console.log(res)
     },
     // 获取票价规则
     async getTicket () {

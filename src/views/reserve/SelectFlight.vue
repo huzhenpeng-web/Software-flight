@@ -14,10 +14,10 @@
       <div class="flight-title">
         <span>单程:</span>
         <span class="city">{{flightReserveForm.departcureCity}}-{{flightReserveForm.arriveCity}}</span>
-        <span>{{flightReserveForm.departDate | dateFormat}}</span>
+        <span>{{path.date | dateFormat}}</span>
       </div>
       <!-- 筛选框 -->
-      <Select></Select>
+      <Select v-if="hackReset"></Select>
       <!-- 航班选择 -->
       <div class="select-flight">
         <el-collapse accordion>
@@ -82,6 +82,10 @@
                 <el-alert title="购票时间已过" :closable="false" center type="error" effect="dark">
                 </el-alert>
               </div>
+              <div v-if="code === 404">
+                <el-alert title="获取当前座位数失败,请刷新后重试!" :closable="false" center type="error" effect="dark">
+                </el-alert>
+              </div>
             </el-collapse-item>
           </el-card>
         </el-collapse>
@@ -113,7 +117,8 @@ export default {
         date: ''
       },
       seatInfo: [],
-      code: 0
+      code: 0,
+      hackReset: false
     }
   },
   computed: {
@@ -126,41 +131,41 @@ export default {
       const { data: res } = await flightQuery(this.$route.query.depart, this.$route.query.arrive, this.$route.query.date)
       window.sessionStorage.setItem('reserveFlight', JSON.stringify(res))
       this.saveReserveFlight(res)
+      this.$nextTick(() => {
+        this.hackReset = true
+      })
       if (this.reserveFlight.resultCode !== 200) {
         this.isEmpty = true
         this.emptyDescription = `您查询的 ${this.reserveForm.departcureCity} 至
-        ${this.reserveForm.arriveCity}（出发日期：${this.reserveForm.departcureDate}） 的机票可能因无航班或航班座位已售完导致暂时无法查询到对应价格。 建议您更换旅行日期或旅行城市重新查询`
+        ${this.reserveForm.arriveCity}（出发日期：${this.$route.query.date}）的机票可能因无航班或航班座位已售完导致暂时无法查询到对应价格。 建议您更换旅行日期或旅行城市重新查询`
       }
     },
     // 读取sessionStorage
     readSessionStorage () {
-      if (sessionStorage.getItem('reserveFlight')) {
-        this.saveReserveFlight(JSON.parse(sessionStorage.getItem('reserveFlight')))
-      }
-      if (sessionStorage.getItem('reserveForm')) {
-        this.saveReserveForm(JSON.parse(sessionStorage.getItem('reserveForm')))
-        this.flightReserveForm = this.reserveForm
-      }
+      this.flightReserveForm = this.reserveForm
     },
     // 订票
     async bookTicket (item) {
       const { data: res } = await getSeat(item.id, item.departDate)
-      console.log(res)
       if (res.resultCode === 500) {
         return this.$message.error('此航班无位置或时间已过,请选择其他航班')
       }
       this.$router.push({ path: '/reserve/book', query: { flightId: item.id, flightDate: item.departDate } })
     },
     async handleChange (item) {
-      const { data: res } = await getSeat(item.id, item.departDate)
-      this.code = res.resultCode
-      this.seatInfo = res.data
+      try {
+        const { data: res } = await getSeat(item.id, item.departDate)
+        this.code = res.resultCode
+        this.seatInfo = res.data
+      } catch (e) {
+        this.code = 404
+      }
     }
   },
   created () {
-    this.readSessionStorage()
     this.loading = false
     this.showEmpty()
+    this.readSessionStorage()
   },
   mounted () {
     // 保存当前路径的参数

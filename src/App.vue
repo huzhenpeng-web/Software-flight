@@ -10,9 +10,12 @@
         </el-header>
         <el-main>
           <!-- 路由占位符 -->
-          <keep-alive include="Reserve">
+          <keep-alive include="Reserve,Book">
             <router-view></router-view>
           </keep-alive>
+          <el-dialog title="用户登录"  @close="handleClose" :visible.sync="showLoginDialog"  width="50%">
+            <Login></Login>
+          </el-dialog>
         </el-main>
       </el-container>
     </el-container>
@@ -22,15 +25,33 @@
 <script>
 import Aside from '@/components/home/Aside.vue'
 import Header from '@/components/home/Header.vue'
-import { mapState } from 'vuex'
+import Login from '@/views/User/Login.vue'
+import { mapState, mapMutations } from 'vuex'
 export default {
   name: 'App',
   components: {
     Aside,
-    Header
+    Header,
+    Login
+  },
+  data () {
+    return {
+      showLoginDialog: false
+    }
   },
   computed: {
-    ...mapState(['isCollapse'])
+    ...mapState(['isCollapse', 'isLoginDialog'])
+  },
+  methods: {
+    ...mapMutations(['saveIsLoginDialog']),
+    handleClose () {
+      this.saveIsLoginDialog(false)
+    }
+  },
+  watch: {
+    isLoginDialog (newVal) {
+      this.showLoginDialog = newVal
+    }
   }
 }
 </script>
@@ -50,6 +71,7 @@ export default {
     }
     .el-main {
       background-color: #eef1f6;
+      overflow-x: hidden;
     }
   }
 }

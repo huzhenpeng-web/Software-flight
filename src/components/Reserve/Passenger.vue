@@ -15,11 +15,11 @@
           <el-form-item prop="name">
             <el-input v-model="passengerForm.name" placeholder="请与登机证件姓名保持一致" clearable></el-input>
           </el-form-item>
-          <el-form-item prop="idCard">
-            <el-input @blur="handleGetAge" clearable v-model="passengerForm.idCard" placeholder="登记证件号码"></el-input>
+          <el-form-item prop="certificateNumber">
+            <el-input @blur="handleGetAge" clearable v-model="passengerForm.certificateNumber" placeholder="登记证件号码"></el-input>
           </el-form-item>
-          <el-form-item prop="phone">
-            <el-input v-model="passengerForm.phone" placeholder="乘机人手机号码" clearable></el-input>
+          <el-form-item prop="phoneNo">
+            <el-input v-model="passengerForm.phoneNo" placeholder="乘机人手机号码" clearable></el-input>
           </el-form-item>
         </el-form>
       </div>
@@ -44,6 +44,7 @@
 import { mapMutations } from 'vuex'
 import { getAge } from '@/utils/age'
 export default {
+  name: 'Passenger',
   data () {
     const checkId = (rule, value, cb) => {
       const idReg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/
@@ -62,14 +63,17 @@ export default {
     return {
       passengerForm: {
         name: '',
-        idCard: '',
-        phone: ''
+        phoneNo: '',
+        // 身份证
+        certificateNumber: '',
+        // 机票等级
+        seatType: 3
       },
       // 表单校验规则
       passengerFormRules: {
         name: [{ required: true, message: '请输入乘客姓名', trigger: ['blur', 'change'] }],
-        idCard: [{ required: true, message: '请输入身份证号码', trigger: ['blur', 'change'] }, { validator: checkId }],
-        phone: [{ required: true, message: '请输入手机号码', trigger: 'blur' }, { validator: checkPhone }]
+        certificateNumber: [{ required: true, message: '请输入身份证号码', trigger: ['blur', 'change'] }, { validator: checkId }],
+        phoneNo: [{ required: true, message: '请输入手机号码', trigger: ['blur', 'change'] }, { validator: checkPhone }]
       },
       imgUrl: [
         require('../../assets/images/passenger/adult.png'),
@@ -78,37 +82,45 @@ export default {
       img: '',
       personArr: ['成人', '儿童', '婴儿'],
       person: '',
-      isOpenImg: false
+      isOpenImg: false,
+      flag: false
     }
   },
   methods: {
     ...mapMutations(['savePassengereInfo']),
     // 获得年龄
     handleGetAge () {
-      const age = getAge(this.passengerForm.idCard)
+      const age = getAge(this.passengerForm.certificateNumber)
       if (age >= 18) { // 成人
         this.isOpenImg = true
         this.img = this.imgUrl[0]
         this.person = this.personArr[0]
+        // 成人
+        this.passengerForm.ticketType = 1
       } else if (age > 3 && age < 18) {
         this.isOpenImg = true
         this.img = this.imgUrl[1]
         this.person = this.personArr[1]
+        // 儿童
+        this.passengerForm.ticketType = 2
       } else if (age > 0 && age <= 3) {
         this.isOpenImg = true
         this.img = this.imgUrl[2]
         this.person = this.personArr[2]
+        // 婴儿
+        this.passengerForm.ticketType = 3
       }
     }
   },
   watch: {
     passengerForm: {
       handler (newVal) {
-        if (newVal.name === '' || newVal.idCard === '' || newVal.phone === '') return
+        if (newVal.name === '' || newVal.certificateNumber === '' || newVal.phoneNo === '') return
         this.$refs.passengerFormRef.validate(val => {
-          if (!val) return
+          if (!val || (this.flag === true)) return
           // 通过验证传乘客信息
           this.savePassengereInfo(this.passengerForm)
+          this.flag = true
         })
       },
       deep: true,

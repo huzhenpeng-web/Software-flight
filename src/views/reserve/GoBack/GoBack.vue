@@ -31,7 +31,7 @@
           </span>
         </div>
       </div>
-      <Select></Select>
+      <Select v-if="hackReset"></Select>
       <!-- 出发航班数据 -->
       <div class="go_flight" v-show="isGo">
         <el-collapse accordion>
@@ -95,6 +95,10 @@
               </div>
               <div v-if="code === 500">
                 <el-alert title="购票时间已过" :closable="false" center type="error" effect="dark">
+                </el-alert>
+              </div>
+              <div v-if="code === 404">
+                <el-alert title="获取当前座位数失败,请刷新后重试!" :closable="false" center type="error" effect="dark">
                 </el-alert>
               </div>
             </el-collapse-item>
@@ -222,7 +226,8 @@ export default {
       flightItem: {},
       seatInfo: [],
       code: 0,
-      tishiShow: false
+      tishiShow: false,
+      hackReset: false
     }
   },
   methods: {
@@ -237,6 +242,10 @@ export default {
         ${this.reserveForm.arriveCity}（出发日期：${this.reserveForm.departcureDate}） 的机票可能因无航班或航班座位已售完导致暂时无法查询到对应价格。 建议您更换旅行日期或旅行城市重新查询`
       }
       this.saveReserveFlight(res)
+      // 刷新子组件
+      this.$nextTick(() => {
+        this.hackReset = true
+      })
       window.sessionStorage.setItem('reserveFlight', JSON.stringify(res))
     },
     // 选择去程并查询返程的数据
@@ -305,9 +314,13 @@ export default {
       this.$router.push(`/reserve/goback/book?goflightid=${this.flightItem.id}&goflightdate=${this.reserveForm.departcureDate}&backflightid=${item.id}&backflightDate=${this.reserveForm.backDate}`)
     },
     async handleChange (item) {
-      const { data: res } = await getSeat(item.id, item.departDate)
-      this.code = res.resultCode
-      this.seatInfo = res.data
+      try {
+        const { data: res } = await getSeat(item.id, item.departDate)
+        this.code = res.resultCode
+        this.seatInfo = res.data
+      } catch (e) {
+        this.code = 404
+      }
     }
   },
   computed: {
