@@ -10,7 +10,7 @@
     <!-- 步骤条 -->
     <el-steps :active="1" align-center>
       <el-step description="乘机信息"></el-step>
-      <el-step description="增值服务"></el-step>
+      <el-step description="锁定机票"></el-step>
       <el-step description="支付"></el-step>
       <el-step description="完成"></el-step>
     </el-steps>
@@ -22,10 +22,17 @@
         </el-alert>
         <el-alert title="出行提醒 ·东航、上航推行免费预选座位服务" type="success" show-icon>
         </el-alert>
+        <el-alert title="航班价格规则" type="success" description="每天特惠 + 基建税燃油税 + 舱位附加价格 + 行李费 + 票价类型打折(成人票不打折,儿童票8折，婴儿票3折)">
+        </el-alert>
         <div class="cardDiv">
           <el-card>
             <div slot="header">
               <span>乘机人</span>
+              <el-radio-group v-model="seatRadio" style="margin-left:40px;">
+                <el-radio-button label="经济舱"></el-radio-button>
+                <el-radio-button label="商务舱"></el-radio-button>
+                <el-radio-button label="头等舱"></el-radio-button>
+              </el-radio-group>
             </div>
             <component v-for="(item,index) in PassengerArr" :is="item.name" :key="index">
               <span slot="passengerNum-slot">{{index + 1}}</span>
@@ -41,7 +48,7 @@
             </div>
           </el-card>
           <div class="rightButton">
-            <el-button type="primary" @click="commitPassenger">下一步</el-button>
+            <el-button type="primary" v-loading="btnLoading" element-loading-text="抢票中,请耐心等待" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)" @click="commitPassenger">下一步</el-button>
           </div>
         </div>
       </div>
@@ -64,7 +71,7 @@
                 <span>{{resultData.airlineCompanyName}}</span>
               </span>
               <span>{{resultData.flightNo}}</span>
-              <span>经济舱</span>
+              <span>{{seatRadio}}</span>
             </div>
             <div class="top-bottom">
               <div class="topDiv">
@@ -88,7 +95,21 @@
             <div>
               <span>成人:</span>
               <span>
-                ￥{{resultData.price - ticketPrice.luggage - ticketPrice.tax}} x {{PassengerArr.length}}
+                ￥{{resultData.price}} x {{person.adult}}
+              </span>
+            </div>
+            <!-- 儿童 -->
+            <div>
+              <span>儿童:</span>
+              <span>
+                ￥{{resultData.price * 0.8}} x {{person.child}}
+              </span>
+            </div>
+            <!-- 婴儿 -->
+            <div>
+              <span>婴儿:</span>
+              <span>
+                ￥{{resultData.price * 0.3}} x {{person.child}}
               </span>
             </div>
             <div>
@@ -103,10 +124,24 @@
                 ￥{{ticketPrice.tax}} x {{PassengerArr.length}}
               </span>
             </div>
+            <div>
+              <span>每天特惠:</span>
+              <span>
+                ￥{{ticketPrice.todayPrice}}
+              </span>
+            </div>
           </div>
           <!-- 下 -->
           <div class="bottom">
-            <div>￥{{resultData.price * this.PassengerArr.length}}</div>
+            <div>
+              ￥{{
+                resultData.price * person.adult + resultData.price * person.child + resultData.price * person.baby +
+                ticketPrice.tax * PassengerArr.length +
+                ticketPrice.luggage * PassengerArr.length +
+                ticketPrice.todayPrice +
+                seatClass * PassengerArr.length
+              }}
+            </div>
           </div>
         </div>
       </div>
@@ -120,6 +155,7 @@ import { flightIdQuery } from '@/api/query'
 import { ticketPrice, orderTicket } from '@/api/ticket'
 import Passenger from '@/components/Reserve/Passenger.vue'
 import { mapState, mapMutations } from 'vuex'
+import { getOrder } from '@/api/order'
 export default {
   name: 'Book',
   components: {
@@ -146,11 +182,16 @@ export default {
         depart: '',
         arrive: '',
         date: ''
-      }
+      },
+      seatRadio: '经济舱',
+      // 选择座位类型
+      seatClass: 0,
+      flightSeat: 1,
+      btnLoading: false
     }
   },
   methods: {
-    ...mapMutations(['savePassengereInfo', 'deletePassengereInfo']),
+    ...mapMutations(['savePassengereInfo', 'deletePassengereInfo', 'updatePassengerInfo', 'saveOrderId', 'clearAllPassenger']),
     // 查询航班信息
     async getFlightInfo () {
       const { data: res } = await flightIdQuery(this.pathInfo)
@@ -173,39 +214,61 @@ export default {
     // 下一步 提交乘客信息
     async commitPassenger () {
       if (this.passengerInfo.length === 0 || this.passengerInfo.length !== this.PassengerArr.length) return this.$message.info('乘机人信息填写不完整!')
+      // 更新舱位等级
+      this.updatePassengerInfo(this.flightSeat)
       const passengerObj = {
         userId: '1',
-        orderFlightDto: [{
-          departDate: this.pathInfo.flightDate,
-          flightId: this.pathInfo.flightId,
-          // 飞机票基础价格
-          ticketSalePrice: this.resultData.price,
-          // 燃油税
-          taxFee: this.ticketPrice.tax,
-          dayDiscount: this.ticketPrice.todayPrice,
-          seatPrice: this.ticketPrice.economyClass,
-          ticketTypePrice: 0,
-          // 行李费
-          luggagePrice: this.ticketPrice.luggage
-        }],
+        orderFlightDto: [
+          {
+            departDate: this.pathInfo.flightDate,
+            flightId: this.pathInfo.flightId,
+            // 飞机票基础价格
+            ticketSalePrice: this.resultData.price,
+            // 燃油税
+            taxFee: this.ticketPrice.tax,
+            dayDiscount: this.ticketPrice.todayPrice,
+            seatPrice: this.seatClass,
+            ticketTypePrice: 0,
+            // 行李费
+            luggagePrice: this.ticketPrice.luggage
+          }
+        ],
         passengerDto: this.passengerInfo,
         tripType: 0
       }
       const { data: res } = await orderTicket(passengerObj)
-      // 成功 进入下一个页面
-      // if (res.resultCode === 200) return
+      this.btnLoading = true
+      // 延时发送订单请求
+      setTimeout(async () => {
+        try {
+          const { data: result } = await getOrder()
+          if (result.resultCode === 200) {
+            this.$message.success('为您锁定机票成功')
+            this.btnLoading = false
+            // 清空乘机人信息
+            this.clearAllPassenger()
+            return this.$router.replace('/reserve/service')
+          } else if (result.resultCode !== 200) {
+            this.$message.error('为你抢票失败,请重新选择航班。')
+            return this.$router.push('/reserve')
+          }
+        } catch (e) {
+          this.btnLoading = false
+          this.$message.error('抢票失败,请重新抢票试一试!')
+        }
+      }, 500)
       // 失败 让顾客重新选择航班
       if (res.resultCode === 500) {
         this.$message.error('已没有剩余票数,请重新选择航班。')
         return this.$router.push('/reserve')
       }
-      console.log(res)
     },
     // 获取票价规则
     async getTicket () {
       const { data: res } = await ticketPrice()
-      this.ticketPrice = res.data
       console.log(res)
+      this.ticketPrice = res.data
+      this.seatClass = this.ticketPrice.economyClass
     }
   },
   created () {
@@ -219,7 +282,7 @@ export default {
     this.path = JSON.parse(localStorage.getItem('path'))
   },
   computed: {
-    ...mapState(['passengerInfo'])
+    ...mapState(['passengerInfo', 'person'])
   },
   watch: {
     PassengerArr (newVal) {
@@ -227,6 +290,18 @@ export default {
         this.linkDisabled = true
       } else {
         this.linkDisabled = false
+      }
+    },
+    seatRadio (newVal) {
+      if (newVal === '头等舱') {
+        this.flightSeat = 1
+        this.seatClass = this.ticketPrice.firstClass
+      } else if (newVal === '商务舱') {
+        this.flightSeat = 2
+        this.seatClass = this.ticketPrice.businessClass
+      } else if (newVal === '经济舱') {
+        this.flightSeat = 3
+        this.seatClass = this.ticketPrice.economyClass
       }
     }
   }
@@ -357,12 +432,12 @@ export default {
         }
         .ticket-price {
           border-bottom: 1px dashed #b4c4d6;
-          div{
+          div {
             display: flex;
             align-items: center;
             height: 25px;
             justify-content: space-between;
-            span{
+            span {
               padding: 0 30px;
             }
           }

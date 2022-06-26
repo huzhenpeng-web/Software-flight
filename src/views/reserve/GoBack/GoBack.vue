@@ -203,6 +203,7 @@ import { mapState, mapMutations } from 'vuex'
 import Select from '@/components/Reserve/Select.vue'
 import { goBackQuery, flightQuery } from '@/api/query.js'
 import { getSeat } from '@/api/ticket'
+import moment from 'moment'
 export default {
   components: {
     Select
@@ -321,6 +322,16 @@ export default {
       } catch (e) {
         this.code = 404
       }
+    },
+    // 判断路径时间
+    // 判断路径的时间是否小于今天
+    decideTime () {
+      // 今天的时间
+      const now = moment(new Date()).format('YYYY-MM-DD')
+      const path = moment(this.$route.query.date).format('X')
+      if (path < moment(now).format('X')) {
+        return this.$router.replace(`/reserve/goback?depart=${this.$route.query.depart}&arrive=${this.$route.query.arrive}&date=${now}`).catch(err => err)
+      }
     }
   },
   computed: {
@@ -337,6 +348,7 @@ export default {
     }
   },
   mounted () {
+    this.decideTime()
     this.showEmpty()
   }
 }

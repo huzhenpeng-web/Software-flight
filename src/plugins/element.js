@@ -35,6 +35,7 @@ import {
   CheckboxGroup,
   RadioGroup,
   Radio,
+  RadioButton,
   DatePicker,
   Carousel,
   CarouselItem,
@@ -88,6 +89,7 @@ const plugins = [
   CheckboxGroup,
   RadioGroup,
   Radio,
+  RadioButton,
   DatePicker,
   Carousel,
   CarouselItem,
@@ -109,3 +111,4 @@ plugins.forEach(item => {
 
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm
+Vue.prototype.$alert = MessageBox.alert

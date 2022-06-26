@@ -14,7 +14,7 @@
       <div class="flight-title">
         <span>单程:</span>
         <span class="city">{{flightReserveForm.departcureCity}}-{{flightReserveForm.arriveCity}}</span>
-        <span>{{path.date | dateFormat}}</span>
+        <span>{{this.$route.query.date | dateFormat}}</span>
       </div>
       <!-- 筛选框 -->
       <Select v-if="hackReset"></Select>
@@ -99,6 +99,7 @@ import { mapState, mapMutations } from 'vuex'
 import { flightQuery } from '@/api/query'
 import { getSeat } from '@/api/ticket'
 import Select from '@/components/Reserve/Select.vue'
+import moment from 'moment'
 export default {
   components: {
     Select
@@ -146,11 +147,15 @@ export default {
     },
     // 订票
     async bookTicket (item) {
-      const { data: res } = await getSeat(item.id, item.departDate)
-      if (res.resultCode === 500) {
-        return this.$message.error('此航班无位置或时间已过,请选择其他航班')
+      try {
+        const { data: res } = await getSeat(item.id, item.departDate)
+        if (res.resultCode === 500) {
+          return this.$message.error('此航班无位置或时间已过,请选择其他航班')
+        }
+        this.$router.push({ path: '/reserve/book', query: { flightId: item.id, flightDate: item.departDate } })
+      } catch (e) {
+        this.$message.error('订票失败,刷新后重试')
       }
-      this.$router.push({ path: '/reserve/book', query: { flightId: item.id, flightDate: item.departDate } })
     },
     async handleChange (item) {
       try {
@@ -160,6 +165,20 @@ export default {
       } catch (e) {
         this.code = 404
       }
+    },
+    // 判断路径的时间是否小于今天
+    decideTime () {
+      // 今天的时间
+      const now = moment(new Date()).format('YYYY-MM-DD')
+      const path = moment(this.$route.query.date).format('X')
+      // 保存当前路径的参数
+      this.path.depart = this.$route.query.depart
+      this.path.arrive = this.$route.query.arrive
+      this.path.date = this.$route.query.date
+      if (path < moment(now).format('X')) {
+        this.path.date = now
+        return this.$router.replace(`/reserve/selectFlight?depart=${this.$route.query.depart}&arrive=${this.$route.query.arrive}&date=${now}`).catch(err => err)
+      }
     }
   },
   created () {
@@ -168,10 +187,7 @@ export default {
     this.readSessionStorage()
   },
   mounted () {
-    // 保存当前路径的参数
-    this.path.depart = this.$route.query.depart
-    this.path.arrive = this.$route.query.arrive
-    this.path.date = this.$route.query.date
+    this.decideTime()
     localStorage.setItem('path', JSON.stringify(this.path))
   }
 }

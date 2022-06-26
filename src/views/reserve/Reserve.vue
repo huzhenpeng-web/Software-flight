@@ -237,7 +237,7 @@ export default {
               console.log(res)
               window.sessionStorage.setItem('moreReserveFlight', JSON.stringify(res))
               window.sessionStorage.setItem('moreReserveForm', JSON.stringify(this.moreReserveForm))
-              // this.$router.push('/reserve/selectFlight')
+              return this.$message.info('此功能暂未开发,请您耐心等待上线!')
             })
           }
         } catch (err) {

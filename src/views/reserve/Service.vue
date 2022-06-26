@@ -4,7 +4,7 @@
     <!-- 步骤条 -->
     <el-steps :active="2" align-center>
       <el-step description="乘机信息"></el-step>
-      <el-step description="增值服务"></el-step>
+      <el-step description="锁定机票"></el-step>
       <el-step description="支付"></el-step>
       <el-step description="完成"></el-step>
     </el-steps>
@@ -12,19 +12,23 @@
       <!-- 左 -->
       <div class="left">
         <div>
-          <el-alert show-icon :closable="false" title="15分钟内完成支付，即可预订成功。" type="warning" effect="dark">
+          <el-alert show-icon :closable="false" :showClose="false" :title="countDown +'分钟内完成支付，即可预订成功。'" type="warning" effect="dark">
           </el-alert>
         </div>
         <!-- 乘客信息 -->
         <div class="passenger_info">
-          <el-card>
+          <el-card v-for="(item,index) in passengers" :key="index">
             <div class="card_div">
-              <div class="num">1</div>
-              <div class="title">成人</div>
-              <div class="passenger_name">胡振鹏</div>
+              <div class="num">{{index + 1}}</div>
+              <div class="title">
+                <span v-if="item.type === 1">成人</span>
+                <span v-if="item.type === 2">儿童</span>
+                <span v-if="item.type === 3">婴儿</span>
+              </div>
+              <div class="passenger_name">{{item.name}}</div>
               <div class="id_card">
                 <span>身份证</span>
-                321322200205235011
+                {{item.certificateNumber}}
               </div>
               <!-- 分割线 -->
               <div class="divider"></div>
@@ -38,53 +42,156 @@
                     </svg>
                   </div>
                   <!-- 电话 -->
-                  <div class="phone">(+86)15250721431</div>
+                  <div class="phone">(+86){{item.phoneNo}}</div>
                 </div>
               </div>
             </div>
           </el-card>
         </div>
-        <!-- 增值服务 -->
-        <div class="add-service">
-          <el-card>
-            <div slot="header">
-              <span>增值服务</span>
-            </div>
-            <div>
-              <span>舱位升级</span>
-            </div>
-          </el-card>
-        </div>
         <!-- 预订须知 -->
         <div class="reserve_know">
-            <div slot="reference" >
-              <h2>预订须知</h2>
-              <el-checkbox style="margin-top:10px;" v-model="checked">我已阅读并同意 购票须知 、机票预订须知 、行李国内运输总条件</el-checkbox>
-            </div>
+          <div slot="reference">
+            <h2>预订须知</h2>
+            <el-checkbox style="margin-top:10px;" v-model="checked">我已阅读并同意 购票须知 、机票预订须知 、行李国内运输总条件</el-checkbox>
+          </div>
         </div>
         <!-- 支付按钮 -->
         <el-button @click="goPay">去支付</el-button>
       </div>
       <!-- 右 -->
       <div class="right">
-        <div class="flight_info"></div>
+        <div class="flight_info">
+          <!-- 单程 -->
+          <div class="one">
+            <div class="date">
+              <span class="basic-tag">第一程</span>
+              <span style="margin-right:15px;">{{flightJourneys.departDate | dateFormat}}</span>
+              <span>{{flightJourneys.departureCityName}}</span>
+              <i class="el-icon-right"></i>
+              <span>{{flightJourneys.arriveCityName}}</span>
+            </div>
+            <div class="airline">
+              <img :src="flightJourneys.airlineImg" alt="">
+              <span style="margin-right:15px;">{{flightJourneys.airlineCompanyName}}</span>
+              <span>{{flightJourneys.flightNo}}</span>
+              <span class="seat" v-if="flightJourneys.seatType === 1">头等舱</span>
+              <span class="seat" v-if="flightJourneys.seatType === 2">商务舱</span>
+              <span class="seat" v-if="flightJourneys.seatType === 3">经济舱</span>
+            </div>
+            <div class="time">
+              <div class="depart">
+                <div>{{flightJourneys.departTime | timeFormat}}</div>
+                <div>{{flightJourneys.departPortName}}</div>
+              </div>
+              <div class="timeLine">
+                <i class="el-icon-arrow-right"></i>
+                <div class="timeline"></div>
+              </div>
+              <div class="arrive">
+                <div>{{flightJourneys.arriveTime | timeFormat}}</div>
+                <div>{{flightJourneys.arrivePortName}}</div>
+              </div>
+            </div>
+          </div>
+          <div class="separation-line"></div>
+          <div class="description-price"></div>
+          <div class="separation-line"></div>
+          <!-- 价格 -->
+          <div class="total-price">￥{{this.orderData.totalPrice}}</div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { getOrder } from '@/api/order.js'
+import moment from 'moment'
 export default {
   data () {
     return {
       // 单选框
-      checked: false
+      checked: false,
+      orderData: {},
+      // 倒计时
+      countDown: 0,
+      // 没转换过的倒计时
+      time: 0,
+      timer: null,
+      // 乘客信息
+      passengers: [],
+      // 航程信息
+      flightJourneys: [],
+      totalPrice: 0
     }
   },
   methods: {
     // 支付
     goPay () {
       if (this.checked === false) return this.$message.warning('请先阅读并勾选协议')
+    },
+    // 获取用户订单
+    async getUserOrder () {
+      const { data: res } = await getOrder()
+      // 订单已被销毁
+      if (res.data.length === 0) return
+      this.orderData = res.data
+      this.handlePrice()
+      // 转换倒计时
+      this.passengers = this.orderData.passengers
+      this.flightJourneys = this.orderData.flightJourneys[0]
+      this.time = this.orderData.remainTime * 1000
+      this.countDown = moment.utc(this.orderData.remainTime * 1000).format('mm:ss')
+      console.log(res)
+    },
+    // 定时器
+    setTimer () {
+      if (this.timer === null) {
+        this.timer = setInterval(() => {
+          // 空对象返回
+          if (JSON.stringify(this.orderData) === '{}') return
+          this.time = this.time - 1000
+          this.countDown = moment.utc(this.time - 1000).format('mm:ss')
+        }, 1000)
+      }
+    },
+    // 处理价格
+    handlePrice () {
+      this.orderData.flightJourneys.forEach(item => {
+        this.totalPrice += item.price
+      })
+    },
+    // 提示
+    alert () {
+      this.$alert('15分钟之内未完成支付', '您的订单已被取消,请重新下单!', {
+        confirmButtonText: '确定',
+        center: true,
+        type: 'warning',
+        callback: action => {
+          this.$router.replace('/reserve')
+        }
+      })
+    }
+  },
+  mounted () {
+    this.getUserOrder()
+    // 触发定时器
+    this.setTimer()
+  },
+  destroyed () {
+    // 销毁定时器
+    clearInterval(this.timer)
+    this.timer = null
+  },
+  watch: {
+    time (newVal) {
+      if (newVal === 0) {
+        this.alert()
+        // 销毁定时器
+        this.time = 0
+        clearInterval(this.timer)
+        this.timer = null
+      }
     }
   }
 }
@@ -165,10 +272,6 @@ export default {
           cursor: pointer;
         }
       }
-      .add-service {
-        margin-top: 50px;
-        box-shadow: 0 0 15px rgb(0 0 0 / 20%);
-      }
       .reserve_know {
         margin-top: 50px;
       }
@@ -190,6 +293,77 @@ export default {
         width: 100%;
         height: 100%;
         background-color: #f5f8f9;
+        .one {
+          .date {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+          }
+          .airline {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #849bab;
+            font-size: 12px;
+            img {
+              width: 30px;
+              height: 30px;
+              margin-right: 15px;
+            }
+            .seat {
+              margin-left: 15px;
+            }
+          }
+          .basic-tag {
+            margin-right: 4px;
+            padding: 0 4px 0 5px;
+            font-family: 'PingFang SC', 'Hiragino Sans GB', 'Lantinghei SC', 'Simsun';
+            vertical-align: middle;
+            font-weight: 300;
+            color: #fff;
+            background: #223344;
+            display: inline-block;
+            font-size: 13px;
+            height: 16px;
+            line-height: 16px;
+            margin-right: 15px;
+          }
+          .time {
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            .depart,
+            .arrive {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              margin: 10px;
+            }
+            .timeLine {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              .timeline {
+                width: 80px;
+                height: 1px;
+                background: #dbe2ea;
+              }
+            }
+          }
+        }
+        .separation-line {
+          margin: 20px 30px;
+          border-bottom: 1px dashed #b4c4d6;
+        }
+        .total-price {
+          color: #ff7d13;
+          font-size: 35px;
+          font-weight: 700;
+          text-align: right;
+        }
       }
     }
   }

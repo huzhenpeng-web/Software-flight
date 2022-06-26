@@ -10,7 +10,7 @@
     <!-- 步骤条 -->
     <el-steps :active="1" align-center>
       <el-step description="乘机信息"></el-step>
-      <el-step description="增值服务"></el-step>
+      <el-step description="锁定机票"></el-step>
       <el-step description="支付"></el-step>
       <el-step description="完成"></el-step>
     </el-steps>
@@ -26,6 +26,11 @@
           <el-card>
             <div slot="header">
               <span>乘机人</span>
+              <el-radio-group v-model="seatRadio" style="margin-left:40px;">
+                <el-radio-button label="经济舱"></el-radio-button>
+                <el-radio-button label="商务舱"></el-radio-button>
+                <el-radio-button label="头等舱"></el-radio-button>
+              </el-radio-group>
             </div>
             <component v-for="(item,index) in PassengerArr" :is="item.name" :key="index">
               <span slot="passengerNum-slot">{{index + 1}}</span>
@@ -42,7 +47,7 @@
           </el-card>
         </div>
         <div class="right-button">
-          <el-button type="primary" @click="submitPassenger">下一步</el-button>
+          <el-button type="primary" v-loading="btnLoading" element-loading-text="抢票中,请耐心等待" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)" @click="submitPassenger">下一步</el-button>
         </div>
       </div>
       <!-- 右 -->
@@ -61,6 +66,7 @@
               <img :src="goFlight.airlineImg" alt="">
               <span style="margin-right:10px;">{{goFlight.airlineCompanyName}}</span>
               <span>{{goFlight.flightNo}}</span>
+              <span style="padding-left:10px;">{{seatRadio}}</span>
             </div>
             <div class="go_time">
               <!-- 出发 -->
@@ -96,6 +102,7 @@
               <img :src="backFlight.airlineImg" alt="">
               <span style="margin-right:10px;">{{backFlight.airlineCompanyName}}</span>
               <span>{{backFlight.flightNo}}</span>
+              <span style="padding-left:10px;">{{seatRadio}}</span>
             </div>
             <div class="go_time">
               <!-- 出发 -->
@@ -126,7 +133,7 @@
               <div class="go_price">
                 <p>
                   成人:
-                  <span>￥{{goFlight.price - ticket.luggage - ticket.tax}}x{{PassengerArr.length}}</span>
+                  <span>￥{{(goFlight.price - 300 + seatClass) - ticket.luggage - ticket.tax}}x{{PassengerArr.length}}</span>
                 </p>
                 <p>
                   行李:
@@ -146,13 +153,15 @@
             <div class="back">
               <span>返程</span>
               <div class="go_price">
-                <p>成人:￥{{backFlight.price - ticket.luggage - ticket.tax}}x{{PassengerArr.length}}</p>
+                <p>
+                  成人:￥{{(backFlight.price - 300 + seatClass) - ticket.luggage - ticket.tax}}x{{PassengerArr.length}}
+                </p>
                 <p>行李:￥{{ticket.luggage}}x{{PassengerArr.length}}</p>
                 <p>燃油税:￥{{ticket.tax}}x{{PassengerArr.length}}</p>
               </div>
             </div>
           </div>
-          <div class="price">￥{{(goFlight.price + backFlight.price)*PassengerArr.length}}</div>
+          <div class="price">￥{{( (goFlight.price - 300 + seatClass) + (backFlight.price - 300 +seatClass))*PassengerArr.length}}</div>
         </div>
       </div>
     </div>
@@ -164,6 +173,7 @@ import Passenger from '@/components/Reserve/Passenger.vue'
 import { flightIdQuery } from '@/api/query'
 import { ticketPrice, orderTicket } from '@/api/ticket'
 import { mapState, mapMutations } from 'vuex'
+import { getOrder } from '@/api/order'
 export default {
   components: {
     Passenger
@@ -196,11 +206,15 @@ export default {
         arrive: '',
         date: ''
       },
-      ticket: []
+      ticket: [],
+      seatRadio: '经济舱',
+      seatClass: 0,
+      flightSeat: 1,
+      btnLoading: false
     }
   },
   methods: {
-    ...mapMutations(['deletePassengereInfo']),
+    ...mapMutations(['deletePassengereInfo', 'updatePassengerInfo', 'savePassengereInfo', 'saveOrderId', 'clearAllPassenger']),
     // 查询航班数据
     async queryFlightData () {
       // 获取路径参数
@@ -233,7 +247,7 @@ export default {
     // 提交乘客信息
     async submitPassenger () {
       if (this.passengerInfo.length === 0 || this.passengerInfo.length !== this.PassengerArr.length) return this.$message.info('乘机人信息填写不完整!')
-      console.log(this.passengerInfo)
+      this.updatePassengerInfo(this.flightSeat)
       const passengerObj = {
         userId: '1',
         orderFlightDto: [
@@ -245,11 +259,12 @@ export default {
             // 燃油税
             taxFee: this.ticket.tax,
             dayDiscount: this.ticket.todayPrice,
-            seatPrice: this.ticket.economyClass,
+            seatPrice: this.seatClass,
             ticketTypePrice: 0,
             // 行李费
             luggagePrice: this.ticket.luggage
-          }, {
+          },
+          {
             departDate: this.backData.flightDate,
             flightId: this.backData.flightId,
             // 飞机票基础价格
@@ -257,7 +272,7 @@ export default {
             // 燃油税
             taxFee: this.ticket.tax,
             dayDiscount: this.ticket.todayPrice,
-            seatPrice: this.ticket.economyClass,
+            seatPrice: this.seatClass,
             ticketTypePrice: 0,
             // 行李费
             luggagePrice: this.ticket.luggage
@@ -267,18 +282,34 @@ export default {
         tripType: 1
       }
       const { data: res } = await orderTicket(passengerObj)
+      this.btnLoading = true
       // 锁定座位成功 进入下一个页面
-      // if(res.resultCode === 200) return this
+      // 延时发送订单请求
+      setTimeout(async () => {
+        const { data: result } = await getOrder()
+        if (result.resultCode === 200) {
+          this.$message.success('为您锁定机票成功')
+          this.btnLoading = false
+          // 清空乘机人信息
+          this.clearAllPassenger()
+          // 保存提交的订单id
+          this.saveOrderId(result.data[result.data.length - 1])
+          return this.$router.replace('/reserve/service')
+        } else if (result.resultCode !== 200) {
+          this.$message.error('为你抢票失败,请重新选择航班。')
+          return this.$router.push('/reserve')
+        }
+      }, 500)
       if (res.resultCode === 500) {
         this.$message.error('已没有剩余票数,请重新选择航班。')
         return this.$router.push('/reserve')
       }
-      console.log(res)
     },
     // 获取票价规则
     async getTicket () {
       const { data: res } = await ticketPrice()
       this.ticket = res.data
+      this.seatClass = this.ticket.economyClass
     }
   },
   created () {
@@ -290,6 +321,20 @@ export default {
   },
   computed: {
     ...mapState(['passengerInfo'])
+  },
+  watch: {
+    seatRadio (newVal) {
+      if (newVal === '头等舱') {
+        this.flightSeat = 1
+        this.seatClass = this.ticket.firstClass
+      } else if (newVal === '商务舱') {
+        this.flightSeat = 2
+        this.seatClass = this.ticket.businessClass
+      } else if (newVal === '经济舱') {
+        this.flightSeat = 3
+        this.seatClass = this.ticket.economyClass
+      }
+    }
   }
 }
 </script>

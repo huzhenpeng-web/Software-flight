@@ -78,7 +78,7 @@ const routes = [
     path: '/reserve/service',
     component: Service,
     meta: {
-      title: '增值服务'
+      title: '【国内航班查询与预定系统】抢购成功'
     }
   }
 ]

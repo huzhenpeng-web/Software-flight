@@ -66,7 +66,7 @@ export default {
         phoneNo: '',
         // 身份证
         certificateNumber: '',
-        // 机票等级
+        // 舱位等级
         seatType: 3
       },
       // 表单校验规则
@@ -87,7 +87,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['savePassengereInfo']),
+    ...mapMutations(['savePassengereInfo', 'savePersonCount']),
     // 获得年龄
     handleGetAge () {
       const age = getAge(this.passengerForm.certificateNumber)
@@ -120,6 +120,7 @@ export default {
           if (!val || (this.flag === true)) return
           // 通过验证传乘客信息
           this.savePassengereInfo(this.passengerForm)
+          this.savePersonCount(this.person)
           this.flag = true
         })
       },
