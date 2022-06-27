@@ -22,6 +22,8 @@
         </el-alert>
         <el-alert title="出行提醒 ·东航、上航推行免费预选座位服务" type="success" show-icon>
         </el-alert>
+        <el-alert title="航班价格规则(最终价格请以结算为准)" type="success" description="每天特惠 + 基建税燃油税 + 舱位附加价格 + 行李费 + 票价类型打折(成人票不打折,儿童票8折，婴儿票3折)">
+        </el-alert>
         <div class="cardDiv">
           <el-card>
             <div slot="header">
@@ -32,7 +34,7 @@
                 <el-radio-button label="头等舱"></el-radio-button>
               </el-radio-group>
             </div>
-            <component v-for="(item,index) in PassengerArr" :is="item.name" :key="index">
+            <component ref="passengerRef" v-for="(item,index) in PassengerArr" :is="item.name" :key="index">
               <span slot="passengerNum-slot">{{index + 1}}</span>
               <i class="el-icon-close" slot="close-slot" @click="removePassenger(index)" v-show="index !== 0">删除</i>
             </component>
@@ -132,8 +134,8 @@
               <span>去程</span>
               <div class="go_price">
                 <p>
-                  成人:
-                  <span>￥{{(goFlight.price - 300 + seatClass) - ticket.luggage - ticket.tax}}x{{PassengerArr.length}}</span>
+                  人数:
+                  <span>￥{{goFlight.price}}x{{PassengerArr.length}}</span>
                 </p>
                 <p>
                   行李:
@@ -154,14 +156,15 @@
               <span>返程</span>
               <div class="go_price">
                 <p>
-                  成人:￥{{(backFlight.price - 300 + seatClass) - ticket.luggage - ticket.tax}}x{{PassengerArr.length}}
+                  人数:￥{{backFlight.price}}x{{PassengerArr.length}}
                 </p>
                 <p>行李:￥{{ticket.luggage}}x{{PassengerArr.length}}</p>
                 <p>燃油税:￥{{ticket.tax}}x{{PassengerArr.length}}</p>
               </div>
             </div>
           </div>
-          <div class="price">￥{{( (goFlight.price - 300 + seatClass) + (backFlight.price - 300 +seatClass))*PassengerArr.length}}</div>
+          <div class="price">￥{{(goFlight.price + seatClass +backFlight.price + ticket.luggage + ticket.tax) * PassengerArr.length}}</div>
+          <div style="text-align:right;color:red;font-size:5px;">最终价格,请到结算页面查看。</div>
         </div>
       </div>
     </div>
@@ -209,12 +212,13 @@ export default {
       ticket: [],
       seatRadio: '经济舱',
       seatClass: 0,
-      flightSeat: 1,
-      btnLoading: false
+      flightSeat: 3,
+      btnLoading: false,
+      commitFlag: false
     }
   },
   methods: {
-    ...mapMutations(['deletePassengereInfo', 'updatePassengerInfo', 'savePassengereInfo', 'saveOrderId', 'clearAllPassenger']),
+    ...mapMutations(['updatePassengerInfo', 'savePassengereInfo', 'clearPassengereInfo']),
     // 查询航班数据
     async queryFlightData () {
       // 获取路径参数
@@ -242,11 +246,18 @@ export default {
     // 减少乘客
     removePassenger (index) {
       this.PassengerArr.splice(index, 1)
-      this.deletePassengereInfo(index)
     },
     // 提交乘客信息
     async submitPassenger () {
-      if (this.passengerInfo.length === 0 || this.passengerInfo.length !== this.PassengerArr.length) return this.$message.info('乘机人信息填写不完整!')
+      if (this.commitFlag === true) return
+      const verify = this.$refs.passengerRef.every(item => {
+        return item.flag === true
+      })
+      if (verify !== true) return this.$message.info('乘机人信息填写不完整!')
+      // 获取动态组件里的值
+      this.$refs.passengerRef.forEach(item => {
+        this.savePassengereInfo(item.passengerForm)
+      })
       this.updatePassengerInfo(this.flightSeat)
       const passengerObj = {
         userId: '1',
@@ -282,24 +293,27 @@ export default {
         tripType: 1
       }
       const { data: res } = await orderTicket(passengerObj)
+      this.clearPassengereInfo()
       this.btnLoading = true
-      // 锁定座位成功 进入下一个页面
+      this.commitFlag = true
       // 延时发送订单请求
       setTimeout(async () => {
-        const { data: result } = await getOrder()
-        if (result.resultCode === 200) {
-          this.$message.success('为您锁定机票成功')
+        try {
+          const { data: result } = await getOrder()
+          if (result.resultCode === 200) {
+            this.$message.success('为您锁定机票成功')
+            this.btnLoading = false
+            return this.$router.replace('/reserve/gbservice')
+          } else if (result.resultCode !== 200) {
+            this.$message.error('为你抢票失败,请重新选择航班。')
+            return this.$router.push('/reserve')
+          }
+        } catch (e) {
           this.btnLoading = false
-          // 清空乘机人信息
-          this.clearAllPassenger()
-          // 保存提交的订单id
-          this.saveOrderId(result.data[result.data.length - 1])
-          return this.$router.replace('/reserve/service')
-        } else if (result.resultCode !== 200) {
-          this.$message.error('为你抢票失败,请重新选择航班。')
-          return this.$router.push('/reserve')
+          this.commitFlag = false
+          this.$message.error('抢票失败,请重新抢票试一试!')
         }
-      }, 500)
+      }, 1000)
       if (res.resultCode === 500) {
         this.$message.error('已没有剩余票数,请重新选择航班。')
         return this.$router.push('/reserve')

@@ -1,5 +1,8 @@
 <template>
-  <div></div>
+  <div class="order-container">
+    <!-- 路由插槽 -->
+    <router-view></router-view>
+  </div>
 </template>
 
 <script>

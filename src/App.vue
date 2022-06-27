@@ -10,7 +10,7 @@
         </el-header>
         <el-main>
           <!-- 路由占位符 -->
-          <keep-alive include="Reserve,Book">
+          <keep-alive include="Reserve">
             <router-view></router-view>
           </keep-alive>
           <el-dialog title="用户登录"  @close="handleClose" :visible.sync="showLoginDialog"  width="50%">
@@ -61,6 +61,7 @@ export default {
   width: 100%;
   height: 100%;
   min-width: 1366px;
+  min-height: 688px;
   .app-container {
     width: 100%;
     height: 100%;

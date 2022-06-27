@@ -1,48 +1,77 @@
 <template>
-  <div>
-    <el-carousel :interval="4000" type="card" height="400px">
-      <el-carousel-item v-for="item in carouselImgs" :key="item.url">
-        <a href="#">
-          <img :src="item.url" width="100%" height="100%" />
-        </a>
-      </el-carousel-item>
-    </el-carousel>
+  <div class="home-container">
+    <img src="@/assets/svg/color-scheme-right.svg" class="img1">
+    <img src="@/assets/svg/color-scheme-left.svg" alt="" class="img2">
+    <div class="flight">
+      <Clock></Clock>
+      <div>即刻起飞!</div>
+      <el-button @click="goReserve">
+        <i class="el-icon-position" style="margin-right:10px;"></i>
+        查询
+      </el-button>
+    </div>
   </div>
 </template>
 
 <script>
+import Clock from 'vue-clock2'
+import { mapMutations } from 'vuex'
 export default {
-  data () {
-    return {
-      carouselImgs: [
-        { url: require('../../assets/images/plane1.jpg') },
-        { url: require('../../assets/images/plane2.jpg') },
-        { url: require('../../assets/images/plane3.jpg') },
-        { url: require('../../assets/images/plane4.jpg') },
-        { url: require('../../assets/images/barImg1.jpg') }
-      ]
+  methods: {
+    ...mapMutations(['updateActivePath']),
+    goReserve () {
+      this.updateActivePath('/reserve')
+      this.$router.push('/reserve')
     }
+  },
+  components: {
+    Clock
   }
 }
 </script>
 
 <style lang="less" scoped>
-.el-carousel{
-  margin-top:15px;
-}
-.el-carousel__item h3 {
-  color: #475669;
-  font-size: 14px;
-  opacity: 0.75;
-  line-height: 200px;
-  margin: 0;
-}
-
-.el-carousel__item:nth-child(2n) {
-  background-color: #99a9bf;
-}
-
-.el-carousel__item:nth-child(2n + 1) {
-  background-color: #d3dce6;
+.home-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background-image: linear-gradient(to right top, #845ec2, #a55dbd, #c15db5, #d95fab, #ec64a0, #f76e91, #fd7b84, #ff8a7a, #ffa26e, #ffbd66, #ffda65, #f9f871);
+  .img1 {
+    width: 400px;
+    height: 400px;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+  }
+  .img2 {
+    width: 400px;
+    height: 400px;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+  }
+  .flight {
+    color: #fff;
+    font-size: 65px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    position: relative;
+    top: 100px;
+    .el-button {
+      margin-top: 50px;
+      border-radius: 50px;
+      background: #00c9b7;
+      width: 180px;
+      height: 50px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.5s;
+      text-transform: uppercase;
+      border: none;
+      color: #fff;
+    }
+  }
 }
 </style>

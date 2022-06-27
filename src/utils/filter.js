@@ -30,3 +30,10 @@ Vue.filter('dateFormat', (val) => {
   })
   return date.slice(5, 10) + '周' + week
 })
+
+// 预订日期截取
+Vue.filter('dateSplice', (val) => {
+  if (val) {
+    return val.slice(0, 10) + ' ' + val.slice(11, val.length)
+  }
+})

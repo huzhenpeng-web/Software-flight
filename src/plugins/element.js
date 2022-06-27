@@ -50,7 +50,11 @@ import {
   Collapse,
   CollapseItem,
   Image,
-  Dialog
+  Dialog,
+  Descriptions,
+  DescriptionsItem,
+  Timeline,
+  TimelineItem
 } from 'element-ui'
 
 const plugins = [
@@ -102,7 +106,11 @@ const plugins = [
   Collapse,
   CollapseItem,
   Image,
-  Dialog
+  Dialog,
+  Descriptions,
+  DescriptionsItem,
+  Timeline,
+  TimelineItem
 ]
 
 plugins.forEach(item => {

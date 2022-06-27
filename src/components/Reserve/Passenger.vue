@@ -87,7 +87,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['savePassengereInfo', 'savePersonCount']),
+    ...mapMutations(['savePerson']),
     // 获得年龄
     handleGetAge () {
       const age = getAge(this.passengerForm.certificateNumber)
@@ -117,10 +117,7 @@ export default {
       handler (newVal) {
         if (newVal.name === '' || newVal.certificateNumber === '' || newVal.phoneNo === '') return
         this.$refs.passengerFormRef.validate(val => {
-          if (!val || (this.flag === true)) return
-          // 通过验证传乘客信息
-          this.savePassengereInfo(this.passengerForm)
-          this.savePersonCount(this.person)
+          if (!val || this.flag === true) return
           this.flag = true
         })
       },

@@ -96,6 +96,41 @@
             </div>
             <div class="separation-line"></div>
           </div>
+          <!-- 双程 -->
+          <div>
+            <div class="one">
+              <div class="date">
+                <span class="basic-tag">第二程</span>
+                <span style="margin-right:15px;">{{flight.departDate | dateFormat}}</span>
+                <span>{{flight.departureCityName}}</span>
+                <i class="el-icon-right"></i>
+                <span>{{flight.arriveCityName}}</span>
+              </div>
+              <div class="airline">
+                <img :src="flightJourneys.airlineImg" alt="">
+                <span style="margin-right:15px;">{{flight.airlineCompanyName}}</span>
+                <span>{{flight.flightNo}}</span>
+                <span class="seat" v-if="flight.seatType === 1">头等舱</span>
+                <span class="seat" v-if="flight.seatType === 2">商务舱</span>
+                <span class="seat" v-if="flight.seatType === 3">经济舱</span>
+              </div>
+              <div class="time">
+                <div class="depart">
+                  <div>{{flight.departTime | timeFormat}}</div>
+                  <div>{{flight.departPortName}}</div>
+                </div>
+                <div class="timeLine">
+                  <i class="el-icon-arrow-right"></i>
+                  <div class="timeline"></div>
+                </div>
+                <div class="arrive">
+                  <div>{{flight.arriveTime | timeFormat}}</div>
+                  <div>{{flight.arrivePortName}}</div>
+                </div>
+              </div>
+            </div>
+            <div class="separation-line"></div>
+          </div>
           <div class="description-price">
             <div v-if="person.adult.count !==0">
               <span>成人</span>
@@ -149,6 +184,7 @@ export default {
       passengers: [],
       // 航程信息
       flightJourneys: [],
+      flight: [],
       person: {
         adult: {
           count: 0,
@@ -183,6 +219,7 @@ export default {
       // 转换倒计时
       this.passengers = this.orderData.passengers
       this.flightJourneys = this.orderData.flightJourneys[0]
+      this.flight = this.orderData.flightJourneys[1]
       this.time = this.orderData.remainTime * 1000
       this.countDown = moment.utc(this.orderData.remainTime * 1000).format('mm:ss')
       console.log(res)
@@ -200,7 +237,6 @@ export default {
     },
     // 处理价格
     handlePrice (arr) {
-      console.log(arr)
       arr.forEach(item => {
         if (item.ticketType === 1) {
           this.person.adult.price = item.ticketSalePrice + item.seatPrice + item.ticketTypePrice

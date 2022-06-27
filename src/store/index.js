@@ -23,12 +23,7 @@ export default new Vuex.Store({
     // 航班号表单数据
     flightNoData: {},
     // 乘客信息
-    passengerInfo: [],
-    person: {
-      adult: 0,
-      child: 0,
-      baby: 0
-    }
+    passengerInfo: []
   },
   getters: {
   },
@@ -53,28 +48,19 @@ export default new Vuex.Store({
       removeDuplicates(state.passengerInfo)
     },
     // 清空乘客
-    clearAllPassenger (state) {
-      state.passengerInfo.length = 1
+    clearPassengereInfo (state) {
+      state.passengerInfo.length = 0
     },
     saveIsLoginDialog (state, value) {
       state.isLoginDialog = value
-    },
-    // 移出乘客
-    deletePassengereInfo (state, index) {
-      state.passengerInfo.splice(index, 1)
     },
     // 更新乘客舱位等级
     updatePassengerInfo (state, value) {
       state.passengerInfo.forEach(item => {
         item.seatType = value
       })
-    },
-    // 乘客数量变化
-    savePersonCount (state, value) {
-      if (value === '成人') return state.person.adult++
-      if (value === '儿童') return state.person.child++
-      if (value === '婴儿') return state.person.baby++
     }
+
   },
   actions: {
   },

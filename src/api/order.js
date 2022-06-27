@@ -12,3 +12,22 @@ const http = axios.create({
 export function getOrder () {
   return http.get('status/1')
 }
+
+// 0待支付 1支付成功
+export function classifyOrder (status) {
+  return http.get(`status/all/1/${status}`)
+}
+
+export function allOrder () {
+  return http.get('status/all/1')
+}
+
+// 结账
+export function checkoutOrder (orderId) {
+  return http.get(`pay/${orderId}`)
+}
+
+// 检查支付是否成功
+export function checkOrder (orderId) {
+  return http.get(`/pay/check/${orderId}`)
+}

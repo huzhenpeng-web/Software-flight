@@ -15,6 +15,18 @@
           </svg>
           <span slot="title">{{item.name}}</span>
         </el-menu-item>
+        <el-submenu index="/order">
+          <template slot="title">
+            <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-quanbudingdan"></use>
+            </svg>
+            <span>我的订单</span>
+          </template>
+          <el-menu-item v-for="(i,ind) in submenu" :key="ind" :index="i.path">
+            <i :class="i.icon"></i>
+            <span slot="title">{{i.name}}</span>
+          </el-menu-item>
+        </el-submenu>
       </el-menu>
     </div>
   </div>
@@ -29,8 +41,13 @@ export default {
       menus: [
         { name: '首页', icon: '#icon-shouye', path: '/home' },
         { name: '查询航班', icon: '#icon-sousuo', path: '/query' },
-        { name: '机票预定', icon: '#icon-feiji', path: '/reserve' },
-        { name: '我的订单', icon: '#icon-quanbudingdan', path: '/order' }
+        { name: '机票预定', icon: '#icon-feiji', path: '/reserve' }
+      ],
+      // 订单
+      submenu: [
+        { name: '待支付', icon: 'el-icon-s-order', path: '/order/pay' },
+        { name: '待出行', icon: 'el-icon-s-order', path: '/order/go' },
+        { name: '全部订单', icon: 'el-icon-s-order', path: '/order/all' }
       ]
     }
   },

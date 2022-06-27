@@ -22,3 +22,7 @@ body {
 [v-cloak] {
   display: none !important;
 }
+
+.el-scrollbar__wrap {
+  overflow-x: hidden !important;
+}

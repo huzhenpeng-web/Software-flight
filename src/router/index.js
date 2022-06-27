@@ -5,13 +5,19 @@ import Flight from '@/views/query/Flight.vue'
 import FlightNo from '@/views/query/FlightNo.vue'
 import Reserve from '@/views/reserve/Reserve.vue'
 import Order from '@/views/order/Order.vue'
+import OrderPay from '@/views/order/Pay.vue'
+import OrderAll from '@/views/order/All.vue'
+import OrderGo from '@/views/order/Go.vue'
 import SelectFlight from '@/views/reserve/SelectFlight.vue'
 import Book from '@/views/reserve/Book.vue'
 import GoBack from '@/views/reserve/GoBack/GoBack.vue'
 import GbBook from '@/views/reserve/GoBack/GbBook.vue'
 import Service from '@/views/reserve/Service.vue'
+import GbService from '@/views/reserve/GoBack/GbService.vue'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
+import store from '@/store/index'
+import Test from '@/components/Test.vue'
 
 Vue.use(VueRouter)
 
@@ -49,7 +55,12 @@ const routes = [
     component: Order,
     meta: {
       title: '我的订单'
-    }
+    },
+    children: [
+      { path: 'pay', component: OrderPay },
+      { path: 'all', component: OrderAll },
+      { path: 'go', component: OrderGo }
+    ]
   }, {
     path: '/reserve/selectFlight',
     component: SelectFlight,
@@ -80,6 +91,15 @@ const routes = [
     meta: {
       title: '【国内航班查询与预定系统】抢购成功'
     }
+  }, {
+    path: '/reserve/gbservice',
+    component: GbService,
+    meta: {
+      title: '【国内航班查询与预定系统】抢购成功'
+    }
+  }, {
+    path: '/test',
+    component: Test
   }
 ]
 
@@ -93,6 +113,9 @@ router.beforeEach((to, from, next) => {
   NProgress.start()
   if (to.meta.title) {
     document.title = to.meta.title
+  }
+  if (to.path.includes('/home')) {
+    store.commit('updateActivePath', '/home')
   }
   next()
 })
