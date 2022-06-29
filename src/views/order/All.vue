@@ -5,11 +5,10 @@
       <el-breadcrumb-item>我的订单</el-breadcrumb-item>
       <el-breadcrumb-item>全部订单</el-breadcrumb-item>
     </el-breadcrumb>
+    <el-alert center style="margin-top:15px;" type="warning" title="航班起飞之前，退票收取票面价（不含税）20%的手续费。航班起飞之后，退票收取票面价（不含税）30%的手续费。"></el-alert>
     <div class="order">
       <el-card>
-        <el-table style="width:100%;" :data="orderData" :header-cell-style="{'text-align':'center'}" :cell-style="{'text-align':'center'}" border stripe max-height="600" :highlight-current-row="true">
-          <!-- <el-table-column type="selection">
-          </el-table-column> -->
+        <el-table v-loading="loading" style="width:100%;" :data="orderData" :header-cell-style="{'text-align':'center'}" :cell-style="{'text-align':'center'}" border stripe max-height="520" :highlight-current-row="true">
           <el-table-column label="订单号" prop="id">
           </el-table-column>
           <el-table-column label="预订日期">
@@ -32,17 +31,32 @@
             <template slot-scope="scope">
               <el-tag v-if="scope.row.orderStatus === 0" type="warning">待支付</el-tag>
               <el-tag v-if="scope.row.orderStatus === 1" type="success">支付成功</el-tag>
+              <el-tag v-if="scope.row.orderStatus === 2" type="error">已取消</el-tag>
+              <el-tag v-if="scope.row.orderStatus === 3" type="info">已退单</el-tag>
+              <el-tag v-if="scope.row.orderStatus === 4" type="primary">已改单</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
               <div class="handle">
                 <el-button icon="el-icon-mobile-phone" @click="checkout(scope.row)" type="warning" size="small" v-if="scope.row.orderStatus === 0">去支付</el-button>
-                <el-button icon="el-icon-close" type="danger" size="small" v-if="scope.row.orderStatus === 1">退款</el-button>
+                <el-button icon="el-icon-close" type="danger" @click="returnOrderTicket(scope.row.id)" size="small" v-if="scope.row.orderStatus === 1">退款</el-button>
+                <el-button icon="el-icon-close" type="danger" @click="returnOrderTicket(scope.row.id)" size="small" v-if="scope.row.orderStatus === 4">退款</el-button>
                 <el-tooltip class="item" effect="dark" content="查看订单机票" placement="top">
                   <svg class="icon" aria-hidden="true" @click="showTicket(scope.row)">
                     <use xlink:href="#icon-feijipiao"></use>
                   </svg>
+                </el-tooltip>
+                <el-tooltip v-if="scope.row.orderStatus === 1 || scope.row.orderStatus === 4" class="item" effect="dark" content="修改订单" placement="top">
+                  <el-dropdown>
+                    <span class="el-dropdown-link">
+                      <i class="el-icon-more"></i>
+                    </span>
+                    <el-dropdown-menu slot="dropdown">
+                      <el-dropdown-item @click.native="editSeat(scope.row)">修改舱位</el-dropdown-item>
+                      <el-dropdown-item @click.native="editDate(scope.row)">修改日期</el-dropdown-item>
+                    </el-dropdown-menu>
+                  </el-dropdown>
                 </el-tooltip>
               </div>
             </template>
@@ -126,7 +140,7 @@
       </el-card>
     </div>
     <!-- 结账对话框 -->
-    <el-dialog ref="checkOutDialogRef" center title="付款" :visible.sync="checkoutVisible" width="30%"  @close="closeCheckOutDialog">
+    <el-dialog ref="checkOutDialogRef" center title="付款" :visible.sync="checkoutVisible" width="30%" @close="closeCheckOutDialog">
       <div class="checkoutDialog">
         <div class="qrcode" id="qrcode" ref="qrCodeUrl"></div>
         <div class="description">
@@ -312,7 +326,9 @@
 
 <script>
 import { allOrder, checkOrder } from '@/api/order'
+import { returnTicket } from '@/api/ticket'
 import QRCode from 'qrcodejs2'
+import { mapMutations } from 'vuex'
 export default {
   data () {
     return {
@@ -325,14 +341,17 @@ export default {
       // 订单结账对象
       checkoutInfo: {},
       url: '',
-      qrcode: {}
+      qrcode: {},
+      loading: true
     }
   },
   methods: {
+    ...mapMutations(['saveEditOrderInfo']),
     // 获取所有订单信息
     async getAllOrder () {
       const { data: res } = await allOrder()
       this.orderData = res.data
+      this.loading = false
     },
     // 展示机票
     showTicket (tickets) {
@@ -366,21 +385,52 @@ export default {
       if (res.resultCode === 200) {
         this.$message.success('支付成功')
       } else if (res.resultCode === 500) {
-        this.$message.info('未成功支付')
+        this.$message.info('未支付')
       }
+      this.getAllOrder()
       this.checkoutVisible = false
       document.getElementById('qrcode').innerHTML = ''
     },
     // 检查是否支付成功
-    async checkPay () {
-      const { data: res } = await checkOrder(this.checkoutInfo.id)
-      if (res.resultCode === 200) {
-        this.closeCheckOutDialog()
-        this.getAllOrder()
-        return this.$message.success('支付已成功')
-      } else if (res.resultCode === 500) {
-        return this.$message.error('支付失败,请重新扫码支付')
-      }
+    checkPay () {
+      this.checkoutVisible = false
+    },
+    // 退票
+    returnOrderTicket (id) {
+      this.$confirm('确认是否要退款', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(async () => {
+          const { data: res } = await returnTicket(id)
+          console.log(res)
+          // 退款成功
+          if (res.resultCode === 200) {
+            // 退款成功 重新获取订单
+            this.$message.success('退款成功')
+            this.getAllOrder()
+          } else if (res.resultCode === 500) {
+            this.$message.error('当前状态无法退款')
+          }
+        })
+        .catch((e) => {
+          if (e === 'cancel') {
+            this.$message.info('取消退款')
+          } else {
+            this.$message.error('网络请求失败')
+          }
+        })
+    },
+    // 修改座位
+    editSeat (orderInfo) {
+      this.saveEditOrderInfo(orderInfo)
+      this.$router.push('/order/editseat')
+    },
+    // 修改日期
+    editDate (orderInfo) {
+      this.saveEditOrderInfo(orderInfo)
+      this.$router.push('/order/editdate')
     }
   },
   created () {
@@ -401,7 +451,7 @@ export default {
       .handle {
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: left;
         .icon {
           width: 30px;
           height: 30px;
@@ -551,5 +601,12 @@ export default {
       }
     }
   }
+}
+/deep/ .el-scrollbar__wrap {
+  overflow-x: hidden;
+}
+.el-dropdown-link {
+  margin-left: 15px;
+  cursor: pointer;
 }
 </style>

@@ -199,19 +199,22 @@ export default {
           price: 0
         }
       },
-      priceVos: []
+      priceVos: [],
+      orderId: 0
     }
   },
   methods: {
     // 支付
     goPay () {
       if (this.checked === false) return this.$message.warning('请先阅读并勾选协议')
+      this.$router.push(`/reserve/pay?orderid=${this.orderId}`)
     },
     // 获取用户订单
     async getUserOrder () {
       const { data: res } = await getOrder()
       // 订单已被销毁
       if (res.data.length === 0) return
+      this.orderId = res.data.id
       this.orderData = res.data
       this.handlePerson()
       this.priceVos = this.orderData.priceVos[0]

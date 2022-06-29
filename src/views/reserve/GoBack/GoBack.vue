@@ -263,6 +263,7 @@ export default {
         afterDate: this.reserveForm.backDate
       }
       const { data: res } = await goBackQuery(flightInfo)
+      if (res.resultCode === 500) return this.$message.info('查询不到返程航班,请更换航班')
       if (res.data.length === 0) this.tishiShow = true
       if (res.resultCode === 200) {
         // 复制去程数据
@@ -276,12 +277,6 @@ export default {
         this.isGo = false
         this.isBack = true
         this.flag = true
-        /*         // 修改按钮文字
-        this.buttonType[index].content = '已选去程'
-        this.buttonType[index].type = 'success' */
-      }
-      if (res.resultCode === 500) {
-        return this.$message.info('查询不到返程航班,请更换航班')
       }
     },
     // 切换tab
@@ -323,7 +318,6 @@ export default {
         this.code = 404
       }
     },
-    // 判断路径时间
     // 判断路径的时间是否小于今天
     decideTime () {
       // 今天的时间

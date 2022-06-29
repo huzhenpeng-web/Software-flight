@@ -3,22 +3,24 @@
   <div class="login_container">
     <div class="login_box">
       <!-- 头像 -->
-      <div class="login_avatar"></div>
+      <div class="login_avatar">
+        <img src="@/assets/images/avatar/tx.png" alt="">
+      </div>
       <!-- 登录表单 -->
       <div class="login_div">
         <div>
-          <el-form>
+          <el-form :model="loginForm">
             <el-form-item label="账号:">
-              <el-input></el-input>
+              <el-input v-model="loginForm.username"></el-input>
             </el-form-item>
             <el-form-item label="密码:">
-              <el-input></el-input>
+              <el-input v-model="loginForm.password" type="password"></el-input>
             </el-form-item>
           </el-form>
         </div>
         <div class="footer">
           <span slot="footer" class="dialog-footer">
-            <el-button>取 消</el-button>
+            <el-button @click="showLoginDialog">取 消</el-button>
             <el-button type="primary">登 录</el-button>
           </span>
         </div>
@@ -28,7 +30,23 @@
 </template>
 
 <script>
-export default {}
+import { mapMutations } from 'vuex'
+export default {
+  data () {
+    return {
+      loginForm: {
+        username: 'admin',
+        password: 'admin'
+      }
+    }
+  },
+  methods: {
+    ...mapMutations(['saveIsLoginDialog']),
+    showLoginDialog () {
+      this.saveIsLoginDialog(false)
+    }
+  }
+}
 </script>
 
 <style lang="less" scoped>
@@ -38,12 +56,28 @@ export default {}
     width: 80%;
     display: flex;
     margin: 0 auto;
-    .login_div{
+    flex-direction: column;
+    .login_avatar {
+    margin: 0 auto;
+      border: 1px solid #409eff;
+      width: 100px;
+      height: 100px;
+      padding: 2px;
+      border-radius: 50%;
+      img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        -webkit-user-drag: none;
+      }
+    }
+    .login_div {
       width: 100%;
-      .el-input{
+      margin-top: 30px;
+      .el-input {
         width: 80%;
       }
-      .footer{
+      .footer {
         display: flex;
         justify-content: center;
       }

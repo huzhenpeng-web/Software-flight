@@ -4,7 +4,7 @@ import createPersistedState from 'vuex-persistedstate'
 import { removeDuplicates } from '@/utils/remove'
 
 Vue.use(Vuex)
-const PERSIST_PATHS = ['activeStep', 'reserveForm', 'reserveFlight', 'isCollapse', 'orderId']
+const PERSIST_PATHS = ['activeStep', 'reserveForm', 'reserveFlight', 'isCollapse', 'editOrderInfo', 'token']
 
 export default new Vuex.Store({
   state: {
@@ -23,7 +23,10 @@ export default new Vuex.Store({
     // 航班号表单数据
     flightNoData: {},
     // 乘客信息
-    passengerInfo: []
+    passengerInfo: [],
+    // 修改订单的信息
+    editOrderInfo: {},
+    token: ''
   },
   getters: {
   },
@@ -59,8 +62,11 @@ export default new Vuex.Store({
       state.passengerInfo.forEach(item => {
         item.seatType = value
       })
+    },
+    // 保存修改订单的信息
+    saveEditOrderInfo (state, value) {
+      state.editOrderInfo = value
     }
-
   },
   actions: {
   },

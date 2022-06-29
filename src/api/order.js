@@ -13,7 +13,7 @@ export function getOrder () {
   return http.get('status/1')
 }
 
-// 0待支付 1支付成功
+// 0待支付 1支付成功 //3已取消
 export function classifyOrder (status) {
   return http.get(`status/all/1/${status}`)
 }
@@ -30,4 +30,9 @@ export function checkoutOrder (orderId) {
 // 检查支付是否成功
 export function checkOrder (orderId) {
   return http.get(`/pay/check/${orderId}`)
+}
+
+// 查询规则
+export function queryTicketRule (tripType) {
+  return http.get(`ticket/rule/${tripType}`)
 }

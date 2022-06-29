@@ -71,7 +71,10 @@ export default {
       },
       // 表单校验规则
       passengerFormRules: {
-        name: [{ required: true, message: '请输入乘客姓名', trigger: ['blur', 'change'] }],
+        name: [
+          { required: true, message: '请输入乘客姓名', trigger: ['blur', 'change'] },
+          { min: 1, max: 10, message: '姓名长度大于1小于10', trigger: ['blur'] }
+        ],
         certificateNumber: [{ required: true, message: '请输入身份证号码', trigger: ['blur', 'change'] }, { validator: checkId }],
         phoneNo: [{ required: true, message: '请输入手机号码', trigger: ['blur', 'change'] }, { validator: checkPhone }]
       },

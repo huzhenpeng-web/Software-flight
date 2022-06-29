@@ -3,11 +3,11 @@
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>我的订单</el-breadcrumb-item>
-      <el-breadcrumb-item>全部订单</el-breadcrumb-item>
+      <el-breadcrumb-item>待支付</el-breadcrumb-item>
     </el-breadcrumb>
     <div class="order">
       <el-card>
-        <el-table style="width:100%;" :data="orderData" :header-cell-style="{'text-align':'center'}" :cell-style="{'text-align':'center'}" border stripe max-height="600" :highlight-current-row="true">
+        <el-table v-loading="loading" style="width:100%;" :data="orderData" :header-cell-style="{'text-align':'center'}" :cell-style="{'text-align':'center'}" border stripe max-height="600" :highlight-current-row="true">
           <el-table-column label="订单号" prop="id">
           </el-table-column>
           <el-table-column label="预订日期">
@@ -321,7 +321,8 @@ export default {
       tickets: [],
       // 订单结账对象
       checkoutInfo: {},
-      url: ''
+      url: '',
+      loading: true
     }
   },
   methods: {
@@ -329,6 +330,7 @@ export default {
     async getAllOrder () {
       const { data: res } = await classifyOrder(0)
       this.orderData = res.data
+      this.loading = false
       console.log(res)
     },
     // 展示机票
@@ -368,19 +370,13 @@ export default {
       } else if (res.resultCode === 500) {
         this.$message.info('未成功支付')
       }
+      this.getAllOrder()
       this.checkoutVisible = false
       document.getElementById('qrcode').innerHTML = ''
     },
     // 检查是否支付成功
-    async checkPay () {
-      const { data: res } = await checkOrder(this.checkoutInfo.id)
-      if (res.resultCode === 200) {
-        this.closeCheckOutDialog()
-        this.getAllOrder()
-        return this.$message.success('支付成功')
-      } else if (res.resultCode === 500) {
-        return this.$message.error('支付失败,请重新扫码支付')
-      }
+    checkPay () {
+      this.checkoutVisible = false
     }
   },
   created () {
@@ -555,5 +551,8 @@ export default {
   ::v-deep .el-dialog {
     height: 400px;
   }
+}
+/deep/ .el-scrollbar__wrap {
+  overflow-x: hidden;
 }
 </style>

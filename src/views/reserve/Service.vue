@@ -163,13 +163,16 @@ export default {
           price: 0
         }
       },
-      priceVos: []
+      priceVos: [],
+      // 订单id
+      orderId: 0
     }
   },
   methods: {
     // 支付
     goPay () {
       if (this.checked === false) return this.$message.warning('请先阅读并勾选协议')
+      this.$router.push(`/reserve/pay?orderid=${this.orderId}`)
     },
     // 获取用户订单
     async getUserOrder () {
@@ -177,6 +180,7 @@ export default {
       // 订单已被销毁
       if (res.data.length === 0) return
       this.orderData = res.data
+      this.orderId = res.data.id
       this.handlePerson()
       this.priceVos = this.orderData.priceVos[0]
       this.handlePrice(this.orderData.priceVos)
@@ -200,7 +204,6 @@ export default {
     },
     // 处理价格
     handlePrice (arr) {
-      console.log(arr)
       arr.forEach(item => {
         if (item.ticketType === 1) {
           this.person.adult.price = item.ticketSalePrice + item.seatPrice + item.ticketTypePrice

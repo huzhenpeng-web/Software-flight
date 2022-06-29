@@ -54,7 +54,12 @@ import {
   Descriptions,
   DescriptionsItem,
   Timeline,
-  TimelineItem
+  TimelineItem,
+  Result,
+  PageHeader,
+  Dropdown,
+  DropdownMenu,
+  DropdownItem
 } from 'element-ui'
 
 const plugins = [
@@ -110,7 +115,12 @@ const plugins = [
   Descriptions,
   DescriptionsItem,
   Timeline,
-  TimelineItem
+  TimelineItem,
+  Result,
+  PageHeader,
+  Dropdown,
+  DropdownMenu,
+  DropdownItem
 ]
 
 plugins.forEach(item => {

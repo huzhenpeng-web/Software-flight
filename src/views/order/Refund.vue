@@ -3,9 +3,8 @@
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>我的订单</el-breadcrumb-item>
-      <el-breadcrumb-item>待出行</el-breadcrumb-item>
+      <el-breadcrumb-item>已退款</el-breadcrumb-item>
     </el-breadcrumb>
-    <el-alert center style="margin-top:15px;" type="warning" title="航班起飞之前，退票收取票面价（不含税）20%的手续费。航班起飞之后，退票收取票面价（不含税）30%的手续费。"></el-alert>
     <div class="order">
       <el-card>
         <el-table v-loading="loading" style="width:100%;" :data="orderData" :header-cell-style="{'text-align':'center'}" :cell-style="{'text-align':'center'}" border stripe max-height="520" :highlight-current-row="true">
@@ -29,30 +28,17 @@
           </el-table-column>
           <el-table-column label="订单状态">
             <template slot-scope="scope">
-              <el-tag v-if="scope.row.orderStatus === 1" type="success">支付成功</el-tag>
-              <el-tag v-if="scope.row.orderStatus === 4" type="primary">已改单</el-tag>
+              <el-tag v-if="scope.row.orderStatus === 3" type="info">已退款</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
               <div class="handle">
                 <el-button icon="el-icon-close" @click="returnOrderTicket(scope.row.id)" type="danger" size="small" v-if="scope.row.orderStatus === 1">退款</el-button>
-                <el-button icon="el-icon-close" @click="returnOrderTicket(scope.row.id)" type="danger" size="small" v-if="scope.row.orderStatus === 4">退款</el-button>
                 <el-tooltip class="item" effect="dark" content="查看订单机票" placement="top">
                   <svg class="icon" aria-hidden="true" @click="showTicket(scope.row)">
                     <use xlink:href="#icon-feijipiao"></use>
                   </svg>
-                </el-tooltip>
-                <el-tooltip v-if="scope.row.orderStatus === 1 || scope.row.orderStatus === 4" class="item" effect="dark" content="修改订单" placement="top">
-                  <el-dropdown>
-                    <span class="el-dropdown-link">
-                      <i class="el-icon-more"></i>
-                    </span>
-                    <el-dropdown-menu slot="dropdown">
-                      <el-dropdown-item @click.native="editSeat(scope.row)">修改舱位</el-dropdown-item>
-                      <el-dropdown-item @click.native="editDate(scope.row)">修改日期</el-dropdown-item>
-                    </el-dropdown-menu>
-                  </el-dropdown>
                 </el-tooltip>
               </div>
             </template>
@@ -313,7 +299,6 @@
 <script>
 import { classifyOrder } from '@/api/order'
 import { returnTicket } from '@/api/ticket'
-import { mapMutations } from 'vuex'
 export default {
   data () {
     return {
@@ -325,12 +310,11 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['saveEditOrderInfo']),
     // 获取所有订单信息
     async getAllOrder () {
-      const { data: res } = await classifyOrder([1, 4])
-      this.loading = false
+      const { data: res } = await classifyOrder(3)
       this.orderData = res.data
+      this.loading = false
     },
     // 展示机票
     showTicket (tickets) {
@@ -354,15 +338,6 @@ export default {
         .catch(() => {
           this.$message.info('已取消退款')
         })
-    },
-    // 修改订单
-    editSeat (orderInfo) {
-      this.saveEditOrderInfo(orderInfo)
-      this.$router.push('/order/editseat')
-    },
-    editDate (orderInfo) {
-      this.saveEditOrderInfo(orderInfo)
-      this.$router.push('/order/editdate')
     }
   },
   created () {
@@ -383,7 +358,7 @@ export default {
       .handle {
         display: flex;
         align-items: center;
-        justify-content: left;
+        justify-content: center;
         .icon {
           width: 30px;
           height: 30px;
@@ -513,9 +488,5 @@ export default {
 }
 /deep/ .el-scrollbar__wrap {
   overflow-x: hidden;
-}
-.el-dropdown-link {
-  margin-left: 15px;
-  cursor: pointer;
 }
 </style>

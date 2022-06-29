@@ -47,6 +47,7 @@ export default {
       submenu: [
         { name: '待支付', icon: 'el-icon-s-order', path: '/order/pay' },
         { name: '待出行', icon: 'el-icon-s-order', path: '/order/go' },
+        { name: '已退款', icon: 'el-icon-s-order', path: '/order/refund' },
         { name: '全部订单', icon: 'el-icon-s-order', path: '/order/all' }
       ]
     }

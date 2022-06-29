@@ -133,7 +133,6 @@
           <div style="text-align:right;color:red;font-size:5px;">最终价格,请到结算页面查看。</div>
         </div>
       </div>
-
     </div>
   </div>
 </template>

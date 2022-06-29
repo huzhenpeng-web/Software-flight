@@ -79,7 +79,7 @@
                 </el-tag>
               </div>
               <div v-if="code === 500">
-                <el-alert title="购票时间已过" :closable="false" center type="error" effect="dark">
+                <el-alert title="购票时间已过或无位置" :closable="false" center type="error" effect="dark">
                 </el-alert>
               </div>
               <div v-if="code === 404">
@@ -130,6 +130,7 @@ export default {
     // 是否显示空状态
     async showEmpty () {
       const { data: res } = await flightQuery(this.$route.query.depart, this.$route.query.arrive, this.$route.query.date)
+      console.log(res)
       window.sessionStorage.setItem('reserveFlight', JSON.stringify(res))
       this.saveReserveFlight(res)
       this.$nextTick(() => {
