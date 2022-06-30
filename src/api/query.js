@@ -24,3 +24,13 @@ export function flightNoQuery (flightNo, date) {
 export function flightIdQuery (data) {
   return http.get(`flight/id/${data.flightId}/${data.flightDate}`)
 }
+
+// 价格区间查询
+export function flightPriceQuery (data) {
+  return http.get(`flight/money/${data.departCityName}/${data.arriveCityName}/${data.originMoney}/${data.desMoney}/${data.date}`)
+}
+
+// 航班路线推荐
+export function roadRecommend (departCityName, arriveCityName) {
+  return http.get(`flight/recommend/${departCityName}/${arriveCityName}`, { timeout: 10 * 60 * 1000 })
+}

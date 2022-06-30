@@ -4,7 +4,7 @@ import createPersistedState from 'vuex-persistedstate'
 import { removeDuplicates } from '@/utils/remove'
 
 Vue.use(Vuex)
-const PERSIST_PATHS = ['activeStep', 'reserveForm', 'reserveFlight', 'isCollapse', 'editOrderInfo', 'token']
+const PERSIST_PATHS = ['loginStatus', 'activePath', 'activeStep', 'reserveForm', 'reserveFlight', 'isCollapse', 'editOrderInfo', 'token', 'user']
 
 export default new Vuex.Store({
   state: {
@@ -12,6 +12,7 @@ export default new Vuex.Store({
     isCollapse: false,
     // 是否显示登录面板
     isLoginDialog: false,
+    isRegisterDialog: false,
     // 激活地址
     activePath: '/home',
     // 激活的步骤条
@@ -26,7 +27,9 @@ export default new Vuex.Store({
     passengerInfo: [],
     // 修改订单的信息
     editOrderInfo: {},
-    token: ''
+    token: '',
+    user: {},
+    loginStatus: false
   },
   getters: {
   },
@@ -57,6 +60,9 @@ export default new Vuex.Store({
     saveIsLoginDialog (state, value) {
       state.isLoginDialog = value
     },
+    saveRegisterDialog (state, value) {
+      state.isRegisterDialog = value
+    },
     // 更新乘客舱位等级
     updatePassengerInfo (state, value) {
       state.passengerInfo.forEach(item => {
@@ -66,6 +72,17 @@ export default new Vuex.Store({
     // 保存修改订单的信息
     saveEditOrderInfo (state, value) {
       state.editOrderInfo = value
+    },
+    // 保存token
+    saveToken (state, value) {
+      state.token = value
+    },
+    // 保存用户信息
+    saveUser (state, value) {
+      state.user = value
+    },
+    changeLoginStatus (state, value) {
+      state.loginStatus = value
     }
   },
   actions: {

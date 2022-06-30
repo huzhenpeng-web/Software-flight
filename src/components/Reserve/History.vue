@@ -22,8 +22,7 @@
         </li>
       </ul>
     </div>
-    <el-alert title="暂无历史记录" type="warning" v-show="isShow">
-    </el-alert>
+    <el-empty description="空空如也" v-show="isShow"></el-empty>
   </div>
 </template>
 

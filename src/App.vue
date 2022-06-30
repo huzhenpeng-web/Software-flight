@@ -13,8 +13,11 @@
           <keep-alive include="Reserve">
             <router-view></router-view>
           </keep-alive>
-          <el-dialog title="用户登录"  @close="handleClose" :visible.sync="showLoginDialog"  width="50%">
+          <el-dialog title="用户登录" @close="handleClose" :visible.sync="showLoginDialog" width="50%">
             <Login></Login>
+          </el-dialog>
+          <el-dialog title="用户注册" @close="handleRegisterClose" :visible.sync="showRegisterDialog" width="50%">
+            <Register></Register>
           </el-dialog>
         </el-main>
       </el-container>
@@ -26,31 +29,40 @@
 import Aside from '@/components/home/Aside.vue'
 import Header from '@/components/home/Header.vue'
 import Login from '@/views/User/Login.vue'
+import Register from '@/views/User/Register.vue'
 import { mapState, mapMutations } from 'vuex'
 export default {
   name: 'App',
   components: {
     Aside,
     Header,
-    Login
+    Login,
+    Register
   },
   data () {
     return {
-      showLoginDialog: false
+      showLoginDialog: false,
+      showRegisterDialog: false
     }
   },
   computed: {
-    ...mapState(['isCollapse', 'isLoginDialog'])
+    ...mapState(['isCollapse', 'isLoginDialog', 'isRegisterDialog'])
   },
   methods: {
-    ...mapMutations(['saveIsLoginDialog']),
+    ...mapMutations(['saveIsLoginDialog', 'saveRegisterDialog']),
     handleClose () {
       this.saveIsLoginDialog(false)
+    },
+    handleRegisterClose () {
+      this.saveRegisterDialog(false)
     }
   },
   watch: {
     isLoginDialog (newVal) {
       this.showLoginDialog = newVal
+    },
+    isRegisterDialog (newVal) {
+      this.showRegisterDialog = newVal
     }
   }
 }

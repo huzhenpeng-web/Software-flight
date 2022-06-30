@@ -129,17 +129,21 @@ export default {
     ...mapMutations(['saveReserveFlight', 'saveReserveForm']),
     // 是否显示空状态
     async showEmpty () {
-      const { data: res } = await flightQuery(this.$route.query.depart, this.$route.query.arrive, this.$route.query.date)
-      console.log(res)
-      window.sessionStorage.setItem('reserveFlight', JSON.stringify(res))
-      this.saveReserveFlight(res)
-      this.$nextTick(() => {
-        this.hackReset = true
-      })
-      if (this.reserveFlight.resultCode !== 200) {
-        this.isEmpty = true
-        this.emptyDescription = `您查询的 ${this.reserveForm.departcureCity} 至
+      try {
+        const { data: res } = await flightQuery(this.$route.query.depart, this.$route.query.arrive, this.$route.query.date)
+        console.log(res)
+        window.sessionStorage.setItem('reserveFlight', JSON.stringify(res))
+        this.saveReserveFlight(res)
+        this.$nextTick(() => {
+          this.hackReset = true
+        })
+        if (this.reserveFlight.resultCode !== 200) {
+          this.isEmpty = true
+          this.emptyDescription = `您查询的 ${this.reserveForm.departcureCity} 至
         ${this.reserveForm.arriveCity}（出发日期：${this.$route.query.date}）的机票可能因无航班或航班座位已售完导致暂时无法查询到对应价格。 建议您更换旅行日期或旅行城市重新查询`
+        }
+      } catch (e) {
+        this.$message.error('发起网络请求失败,请刷新重试')
       }
     },
     // 读取sessionStorage

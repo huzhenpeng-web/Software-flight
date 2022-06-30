@@ -8,25 +8,39 @@
       <span>国内航班查询与预定系统</span>
     </div>
     <!-- 右侧 -->
-    <div class="header-right">
-      <div @click="login">
-        <svg class="icon" aria-hidden="true">
-          <use xlink:href="#icon-yonghu"></use>
-        </svg>
-        <span>请登录</span>
-      </div>
+    <div class="header-right" v-if="!loginStatus">
+      <el-dropdown>
+        <div @click="login">
+          <svg class="icon" aria-hidden="true">
+            <use xlink:href="#icon-yonghu"></use>
+          </svg>
+          <span>请登录</span>
+        </div>
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item @click.native="register">点击注册</el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
+    </div>
+    <div class="avatar" v-if="loginStatus">
+      <img src="@/assets/images/avatar/tx.png" alt="">
     </div>
   </div>
 </template>
 
 <script>
-import { mapMutations } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 export default {
   methods: {
-    ...mapMutations(['saveIsLoginDialog']),
+    ...mapMutations(['saveIsLoginDialog', 'saveRegisterDialog']),
     login () {
       this.saveIsLoginDialog(true)
+    },
+    register () {
+      this.saveRegisterDialog(true)
     }
+  },
+  computed: {
+    ...mapState(['loginStatus'])
   }
 }
 </script>
@@ -57,6 +71,15 @@ export default {
   }
   .header-right:hover {
     color: #409eff;
+  }
+  .avatar {
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    img {
+      width: 100%;
+      height: 100%;
+    }
   }
 }
 </style>

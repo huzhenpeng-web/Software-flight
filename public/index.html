@@ -9,6 +9,22 @@
   <script src="<%= BASE_URL %>js/iconfont.js"></script>
   <!-- <title><%= htmlWebpackPlugin.options.title %></title> -->
   <title>国内航班查询与预订系统</title>
+  <% if(htmlWebpackPlugin.options.isProd){ %>
+  <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.14/vue.js"></script>
+  <!-- 引入组件库 -->
+  <script src="https://unpkg.com/element-ui@2.15.6/lib/index.js"></script>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.6/lib/theme-chalk/index.css">
+  <!-- css -->
+  <link href="https://cdn.bootcdn.net/ajax/libs/nprogress/0.2.0/nprogress.css" rel="stylesheet">
+  <!-- js -->
+  <script src="https://cdn.bootcdn.net/ajax/libs/nprogress/0.2.0/nprogress.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/axios/0.27.2/axios.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/moment.js/2.29.3/moment.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/vuex/3.6.2/vuex.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/vue-router/3.5.1/vue-router.js"></script>
+  <!-- <script src="https://cdn.bootcdn.net/ajax/libs/vuex-persistedstate/4.1.0/vuex-persistedstate.js"></script> -->
+  <% } %>
 </head>
 
 <body>

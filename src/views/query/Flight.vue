@@ -13,6 +13,7 @@
       <div>
         <el-radio v-model="radio" label="1" @click.native="isShowCity = false">搜航班号</el-radio>
         <el-radio v-model="radio" label="2">搜起降地</el-radio>
+        <el-radio v-model="radio" label="3">价格区间</el-radio>
       </div>
       <!-- 搜索航班号表单区域 -->
       <el-form ref="queryFormRef" :model="queryForm" :rules="queryFormRules" v-show="radio === '1'">
@@ -47,6 +48,29 @@
           </el-form-item>
         </div>
       </el-form>
+      <!-- 价格区间 -->
+      <el-form ref="priceFormRef" :model="priceForm" :rules="priceFormRules" v-show="radio === '3'">
+        <div class="price_city">
+          <el-form-item class="left" prop="departCityName" label="出发城市:">
+            <City @transfer="getDepartucreCityName"></City>
+          </el-form-item>
+          <el-form-item class="right" prop="departCityName" label="目的城市:">
+            <City @transfer="getArriveCityName"></City>
+          </el-form-item>
+        </div>
+        <div class="price_city">
+          <el-form-item class="left" label="最低价格:" style="margin-left:10px;">
+            <el-input type="number" style="width:200px;" v-model="priceForm.originMoney" clearable></el-input>
+          </el-form-item>
+          <el-form-item class="right" label="最高价格:" style="margin-left:10px;">
+            <el-input type="number" style="width:200px;" v-model="priceForm.desMoney" clearable></el-input>
+          </el-form-item>
+        </div>
+        <el-form-item label="出行日期:" prop="date">
+          <el-date-picker style="width:200px;" v-model="priceForm.date" type="date" value-format="yyyy-MM-dd" placeholder="选择日期" :picker-options="pickerOptions">
+          </el-date-picker>
+        </el-form-item>
+      </el-form>
       <!-- 历史搜索记录 -->
       <div class="tagSearchHistory">
         <el-tag @click="tagSearch(item)" closable v-for="(item,index) in tags" :key="index" @close="handleTagClose(index)">
@@ -63,7 +87,7 @@
 
 <script>
 import moment from 'moment'
-import { flightNoQuery, flightQuery } from '@/api/query'
+import { flightNoQuery, flightQuery, flightPriceQuery } from '@/api/query'
 import { mapMutations } from 'vuex'
 import City from '@/components/city/City.vue'
 export default {
@@ -85,6 +109,14 @@ export default {
         departcureCity: '',
         arriveCity: '',
         time: ''
+      },
+      // 价格区间的表单
+      priceForm: {
+        departCityName: '',
+        arriveCityName: '',
+        originMoney: '',
+        desMoney: '',
+        date: ''
       },
       // 搜索历史标签
       tags: [],
@@ -108,6 +140,11 @@ export default {
         departcureCity: [{ required: true, message: '请填写出发城市', trigger: ['blur', 'change'] }],
         arriveCity: [{ required: true, message: '请填写到达城市', trigger: ['blur', 'change'] }],
         time: [{ required: true, message: '请选择日期', trigger: 'blur' }]
+      },
+      priceFormRules: {
+        departCityName: [{ required: true, message: '请填写出发城市', trigger: ['blur', 'change'] }],
+        arriveCityName: [{ required: true, message: '请填写到达城市', trigger: ['blur', 'change'] }],
+        date: [{ required: true, message: '请选择日期', trigger: 'blur' }]
       }
     }
   },
@@ -127,6 +164,7 @@ export default {
         this.$refs.queryFormRef.validate(async valid => {
           if (!valid) return this.$message.error('请先填写航班号!')
           const { data: res } = await flightNoQuery(this.queryForm.flightNumber, this.queryForm.time)
+          console.log(res)
           // 保存在vuex中
           this.saveFlightNoData(res)
           // 保存在sessionStorage中
@@ -136,7 +174,7 @@ export default {
           this.saveTagHistory(this.queryForm.flightNumber)
           this.$router.push('/query/flightNo')
         })
-      } else {
+      } else if (this.radio === '2') {
         // 起降地搜索
         this.$refs.takeOffRef.validate(async valid => {
           if (!valid) return this.$message.error('请先填完对应的信息!')
@@ -145,6 +183,23 @@ export default {
           sessionStorage.setItem('flightRadio', JSON.stringify(this.radio))
           this.saveTagHistory(this.searchTakeOffForm.departcureCity + '-' + this.searchTakeOffForm.arriveCity)
           this.$router.push('/query/flightNo')
+        })
+      } else {
+        this.$refs.priceFormRef.validate(async valid => {
+          if (!valid) return this.$message.warning('请先填完对应的信息!')
+          if (this.priceForm.originMoney !== '' && this.priceForm.desMoney !== '') {
+            const { data: res } = await flightPriceQuery(this.priceForm)
+            console.log(1)
+            sessionStorage.setItem('flightData', JSON.stringify(res))
+            sessionStorage.setItem('flightRadio', JSON.stringify(this.radio))
+            this.$router.push('/query/flightNo')
+          } else {
+            const { data: res } = await flightQuery(this.priceForm.departCityName, this.priceForm.arriveCityName, this.priceForm.date)
+            console.log(res)
+            sessionStorage.setItem('flightData', JSON.stringify(res))
+            sessionStorage.setItem('flightRadio', JSON.stringify(this.radio))
+            this.$router.push('/query/flightNo')
+          }
         })
       }
     },
@@ -198,6 +253,12 @@ export default {
     },
     getArriveCity (val) {
       this.searchTakeOffForm.arriveCity = val
+    },
+    getDepartucreCityName (val) {
+      this.priceForm.departCityName = val
+    },
+    getArriveCityName (val) {
+      this.priceForm.arriveCityName = val
     }
   }
 }
@@ -244,6 +305,17 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
+  }
+  .price_city {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .left {
+      width: 50%;
+    }
+    .right {
+      width: 50%;
+    }
   }
 }
 </style>

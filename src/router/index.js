@@ -1,29 +1,46 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '@/views/home/Home.vue'
-// const Home = () => import(/* webpackChunkName:"login_home_welcome" */ '@/views/home/Home.vue')
-import Flight from '@/views/query/Flight.vue'
-import FlightNo from '@/views/query/FlightNo.vue'
-import Reserve from '@/views/reserve/Reserve.vue'
-import Order from '@/views/order/Order.vue'
-import OrderPay from '@/views/order/Pay.vue'
-import OrderAll from '@/views/order/All.vue'
-import OrderGo from '@/views/order/Go.vue'
-import OrderRefund from '@/views/order/Refund.vue'
-import EditSeat from '@/views/order/modify/EditSeat.vue'
-import EditDate from '@/views/order/modify/EditDate.vue'
-import SelectFlight from '@/views/reserve/SelectFlight.vue'
-import Book from '@/views/reserve/Book.vue'
-import GoBack from '@/views/reserve/GoBack/GoBack.vue'
-import GbBook from '@/views/reserve/GoBack/GbBook.vue'
-import Service from '@/views/reserve/Service.vue'
-import GbService from '@/views/reserve/GoBack/GbService.vue'
-import Pay from '@/views/reserve/Pay/Pay.vue'
-import Result from '@/views/reserve/Pay/Result.vue'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import store from '@/store/index'
-
+// import Home from '@/views/home/Home.vue'
+const Home = () => import(/* webpackChunkName:"home" */ '@/views/home/Home.vue')
+// import Flight from '@/views/query/Flight.vue'
+const Flight = () => import(/* webpackChunkName:"flight_flightNo" */ '@/views/query/Flight.vue')
+// import FlightNo from '@/views/query/FlightNo.vue'
+const FlightNo = () => import(/* webpackChunkName:"flight_flightNo" */ '@/views/query/FlightNo.vue')
+// import Reserve from '@/views/reserve/Reserve.vue'
+const Reserve = () => import(/* webpackChunkName:"reserve" */ '@/views/reserve/Reserve.vue')
+// import Order from '@/views/order/Order.vue'
+const Order = () => import(/* webpackChunkName:"order" */ '@/views/order/Order.vue')
+// import OrderPay from '@/views/order/Pay.vue'
+const OrderPay = () => import(/* webpackChunkName:"order" */ '@/views/order/Pay.vue')
+// import OrderAll from '@/views/order/All.vue'
+const OrderAll = () => import(/* webpackChunkName:"order" */ '@/views/order/All.vue')
+// import OrderGo from '@/views/order/Go.vue'
+const OrderGo = () => import(/* webpackChunkName:"order" */ '@/views/order/Go.vue')
+// import OrderRefund from '@/views/order/Refund.vue'
+const OrderRefund = () => import(/* webpackChunkName:"order" */ '@/views/order/Refund.vue')
+// import EditSeat from '@/views/order/modify/EditSeat.vue'
+const EditSeat = () => import(/* webpackChunkName:"order" */ '@/views/order/modify/EditSeat.vue')
+// import EditDate from '@/views/order/modify/EditDate.vue'
+const EditDate = () => import(/* webpackChunkName:"order" */ '@/views/order/modify/EditDate.vue')
+// import SelectFlight from '@/views/reserve/SelectFlight.vue'
+const SelectFlight = () => import(/* webpackChunkName:"reserve" */ '@/views/reserve/SelectFlight.vue')
+// import Book from '@/views/reserve/Book.vue'
+const Book = () => import(/* webpackChunkName:"reserve" */ '@/views/reserve/Book.vue')
+// import GoBack from '@/views/reserve/GoBack/GoBack.vue'
+const GoBack = () => import(/* webpackChunkName:"reserve" */ '@/views/reserve/GoBack/GoBack.vue')
+// import GbBook from '@/views/reserve/GoBack/GbBook.vue'
+const GbBook = () => import(/* webpackChunkName:"reserve" */ '@/views/reserve/GoBack/GbBook.vue')
+// import Service from '@/views/reserve/Service.vue'
+const Service = () => import(/* webpackChunkName:"reserve" */ '@/views/reserve/Service.vue')
+// import GbService from '@/views/reserve/GoBack/GbService.vue'
+const GbService = () => import(/* webpackChunkName:"reserve" */ '@/views/reserve/GoBack/GbService.vue')
+// import Pay from '@/views/reserve/Pay/Pay.vue'
+const Pay = () => import(/* webpackChunkName:"reserve" */ '@/views/reserve/Pay/Pay.vue')
+// import Result from '@/views/reserve/Pay/Result.vue'
+const Result = () => import(/* webpackChunkName:"reserve" */ '@/views/reserve/Pay/Result.vue')
 Vue.use(VueRouter)
 
 const routes = [

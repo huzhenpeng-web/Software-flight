@@ -27,7 +27,7 @@
               计划起飞
               <i class="el-icon-arrow-down" v-show="!isDepUp"></i>
               <i class="el-icon-arrow-up" v-show="isDepUp"></i>
-              <div v-if="isDepContainer" class="depContainer" >
+              <div v-if="isDepContainer" class="depContainer">
                 <div @click="depSort(0)">计划起飞 早-晚</div>
                 <div @click="depSort(1)">计划起飞 晚-早</div>
               </div>
@@ -43,28 +43,62 @@
               </div>
             </li>
             <li>航班状态</li>
+            <li>航班价格</li>
           </ul>
         </el-card>
-        <el-card v-for="(item,index) in flightData" :key="index" class="other-card">
-          <ul>
-            <li class="item1">
-              <img :src="item.airlineImg" alt="">
-              <div>{{item.airlineCompanyName + item.flightNo}}</div>
-            </li>
-            <li class="item2">
-              <span class="time">{{item.departTime | timeFormat}}</span>
-              <span>{{item.departPortName}}</span>
-            </li>
-            <li>
-              <img src="@/assets/images/flight/jiantou.png" alt="">
-            </li>
-            <li class="item2">
-              <span class="time">{{item.arriveTime | timeFormat}}</span>
-              <span>{{item.arrivePortName}}</span>
-            </li>
-            <li :class="{successStatus:item.flightStatus === '航班按计划执行',failStatus:item.flightStatus === '航班取消'}">{{item.flightStatus}}</li>
-          </ul>
-        </el-card>
+        <el-collapse accordion>
+          <el-card v-for="(item,index) in flightData" :key="index" class="other-card">
+            <ul>
+              <li class="item1">
+                <el-image :src="item.airlineImg" alt="">
+                  <div slot="placeholder" class="image-slot">
+                    加载中<span class="dot">...</span>
+                  </div>
+                </el-image>
+                <div>{{item.airlineCompanyName + item.flightNo}}</div>
+              </li>
+              <li class="item2">
+                <span class="time">{{item.departTime | timeFormat}}</span>
+                <span>{{item.departPortName}}</span>
+              </li>
+              <li>
+                <img src="@/assets/images/flight/jiantou.png" alt="">
+              </li>
+              <li class="item2">
+                <span class="time">{{item.arriveTime | timeFormat}}</span>
+                <span>{{item.arrivePortName}}</span>
+              </li>
+              <li :class="{successStatus:item.flightStatus === '航班按计划执行',failStatus:item.flightStatus === '航班取消'}">{{item.flightStatus}}</li>
+              <li class="item2 price">￥{{item.price}}起</li>
+            </ul>
+            <div>
+              <el-collapse-item class="seatItem" title="查看航班剩余座位" @click.native="querySeat(item)">
+                <div v-if="code === 200" class="seat">
+                  <el-tag effect="dark">
+                    头等舱:{{ seatInfo.firstSurplus}}张
+                  </el-tag>
+                  <el-tag effect="dark" type="success">
+                    商务舱:{{ seatInfo.businessSurplus}}张
+                  </el-tag>
+                  <el-tag effect="dark" type="info">
+                    经济舱:{{ seatInfo.economySurplus}}张
+                  </el-tag>
+                  <el-tag effect="dark" type="danger">
+                    总座位:{{ seatInfo.countSeat}}
+                  </el-tag>
+                </div>
+                <div v-if="code === 500">
+                  <el-alert title="购票时间已过或无位置" :closable="false" center type="error" effect="dark">
+                  </el-alert>
+                </div>
+                <div v-if="code === 404">
+                  <el-alert title="获取当前座位数失败,请刷新后重试!" :closable="false" center type="error" effect="dark">
+                  </el-alert>
+                </div>
+              </el-collapse-item>
+            </div>
+          </el-card>
+        </el-collapse>
       </div>
     </div>
   </div>
@@ -72,6 +106,7 @@
 
 <script>
 import { mapState } from 'vuex'
+import { getSeat } from '@/api/ticket'
 export default {
   data () {
     return {
@@ -90,7 +125,9 @@ export default {
       // 计划起飞面板
       isDepContainer: false,
       isArrContainer: false,
-      flightRadio: ''
+      flightRadio: '',
+      code: '',
+      seatInfo: []
     }
   },
   methods: {
@@ -126,11 +163,15 @@ export default {
       })
       // 早-晚
       if (index === 0) {
-        const up = (a, b) => { return a.time - b.time }
+        const up = (a, b) => {
+          return a.time - b.time
+        }
         return this.flightData.sort(up)
       } else {
-      // 晚-早
-        const down = (a, b) => { return b.time - a.time }
+        // 晚-早
+        const down = (a, b) => {
+          return b.time - a.time
+        }
         return this.flightData.sort(down)
       }
     },
@@ -141,12 +182,49 @@ export default {
       })
       // 早-晚
       if (index === 0) {
-        const up = (a, b) => { return a.time - b.time }
+        const up = (a, b) => {
+          return a.time - b.time
+        }
         return this.flightData.sort(up)
       } else {
-      // 晚-早
-        const down = (a, b) => { return b.time - a.time }
+        // 晚-早
+        const down = (a, b) => {
+          return b.time - a.time
+        }
         return this.flightData.sort(down)
+      }
+    },
+    // 赋值
+    setData () {
+      // 按航班号搜索
+      if (this.flightRadio === '1') {
+        const data = JSON.parse(sessionStorage.getItem('flightNoData'))
+        this.flightNoInfo = data
+        if (data.resultCode === 200) {
+          this.length = this.flightNoInfo.data.length
+          this.flight = this.flightNoInfo.data[0]
+          this.flightData = this.flightNoInfo.data
+        }
+      } else {
+        // 按起降地搜索
+        const data = JSON.parse(sessionStorage.getItem('flightData'))
+        this.flightNoInfo = data
+        console.log(this.flightNoInfo)
+        if (data.resultCode === 200) {
+          this.length = this.flightNoInfo.data.length
+          this.flight = this.flightNoInfo.data[0]
+          this.flightData = this.flightNoInfo.data
+        }
+      }
+    },
+    // 查看航班剩余座位
+    async querySeat (item) {
+      try {
+        const { data: res } = await getSeat(item.id, item.departDate)
+        this.code = res.resultCode
+        this.seatInfo = res.data
+      } catch (e) {
+        this.code = 404
       }
     }
   },
@@ -159,24 +237,7 @@ export default {
     }
   },
   mounted () {
-    // 按航班号搜索
-    if (this.flightRadio === '1') {
-      const data = JSON.parse(sessionStorage.getItem('flightNoData'))
-      this.flightNoInfo = data
-      if (data.resultCode === 200) {
-        this.length = this.flightNoInfo.data.length
-        this.flight = this.flightNoInfo.data[0]
-        this.flightData = this.flightNoInfo.data
-      }
-    } else { // 按起降地搜索
-      const data = JSON.parse(sessionStorage.getItem('flightData'))
-      this.flightNoInfo = data
-      if (data.resultCode === 200) {
-        this.length = this.flightNoInfo.data.length
-        this.flight = this.flightNoInfo.data[0]
-        this.flightData = this.flightNoInfo.data
-      }
-    }
+    this.setData()
     this.decideFlight()
     window.addEventListener('click', this.otherClose)
   },
@@ -216,7 +277,7 @@ export default {
           align-items: center;
           justify-content: space-between;
           li {
-            width: 20%;
+            width: 17%;
             text-align: center;
             cursor: pointer;
           }
@@ -267,6 +328,10 @@ export default {
               font-weight: 500;
             }
           }
+          .price {
+            color: #0086f6;
+            font-size: 30px;
+          }
         }
       }
       .other-card:hover {
@@ -279,6 +344,11 @@ export default {
       .failStatus {
         color: red;
         font-size: 20px;
+      }
+      .seat {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
       }
     }
   }
