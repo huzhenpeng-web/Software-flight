@@ -260,7 +260,7 @@ export default {
       })
       this.updatePassengerInfo(this.flightSeat)
       const passengerObj = {
-        userId: '1',
+        userId: this.$store.state.user.id,
         orderFlightDto: [
           {
             departDate: this.goData.flightDate,

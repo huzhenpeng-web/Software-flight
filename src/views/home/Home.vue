@@ -34,7 +34,14 @@
       <div class="no_result">
         <el-empty v-if="noResultShow" image="https://webresource.c-ctrip.com/ResH5FlightOnline/flight-home/online/no_result.png">抱歉，没有找到满足条件的航班</el-empty>
         <!-- 推荐城市 -->
-        <div></div>
+        <div>
+          <el-card v-for="(item,index) in cities" :key="index">
+            <div class="content">
+              <span style="margin-right:10px;">{{index + 1}}</span>
+              <span>item</span>
+            </div>
+          </el-card>
+        </div>
       </div>
     </div>
   </div>
@@ -50,7 +57,8 @@ export default {
     return {
       departucreCity: '',
       arriveCity: '',
-      noResultShow: true
+      noResultShow: true,
+      cities: []
     }
   },
   methods: {
@@ -64,7 +72,8 @@ export default {
       if (this.departucreCity === '' || this.arriveCity === '') return this.$message.warning('出发和到达城市都要填写完整')
       this.noResultShow = true
       const { data: res } = await roadRecommend(this.departucreCity, this.arriveCity)
-      console.log(res)
+      this.cities = res.data
+      this.noResultShow = false
     },
     getDepartucreCity (val) {
       this.departucreCity = val
@@ -135,13 +144,17 @@ export default {
         width: 25%;
         display: flex;
         align-items: center;
-      .city_left{
-        margin-left:10px;
-      }
+        .city_left {
+          margin-left: 10px;
+        }
       }
     }
     .no_result {
       text-align: center;
+      .content {
+        display: flex;
+        align-items: center;
+      }
     }
   }
 }

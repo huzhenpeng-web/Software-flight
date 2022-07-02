@@ -24,6 +24,7 @@
             <el-button type="primary" @click="login">登 录</el-button>
           </span>
         </div>
+        <span class="register" @click="register">点击注册</span>
       </div>
     </div>
   </div>
@@ -47,7 +48,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['saveIsLoginDialog', 'saveToken', 'changeLoginStatus']),
+    ...mapMutations(['saveIsLoginDialog', 'saveRegisterDialog', 'saveToken', 'changeLoginStatus', 'saveUser']),
     showLoginDialog () {
       this.saveIsLoginDialog(false)
     },
@@ -61,11 +62,17 @@ export default {
           this.changeLoginStatus(true)
           // 保存token
           this.saveToken(res.data.token)
+          this.saveUser(res.data.user)
           this.saveIsLoginDialog(false)
         } else {
           this.$message.error('登录失败')
         }
       })
+    },
+    register () {
+      // 关闭登录弹框 打开注册弹框
+      this.saveIsLoginDialog(false)
+      this.saveRegisterDialog(true)
     }
   }
 }
@@ -102,6 +109,10 @@ export default {
       .footer {
         display: flex;
         justify-content: center;
+      }
+      .register{
+        color: red;
+        cursor: pointer;
       }
     }
   }

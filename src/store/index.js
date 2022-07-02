@@ -15,8 +15,6 @@ export default new Vuex.Store({
     isRegisterDialog: false,
     // 激活地址
     activePath: '/home',
-    // 激活的步骤条
-    activeStep: '1',
     // 预订的航班
     reserveFlight: {},
     // 预订表单

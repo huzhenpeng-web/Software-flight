@@ -76,15 +76,16 @@ const routes = [
     path: '/order',
     component: Order,
     meta: {
-      title: '我的订单'
+      title: '我的订单',
+      login: true
     },
     children: [
-      { path: 'pay', component: OrderPay },
-      { path: 'all', component: OrderAll },
-      { path: 'go', component: OrderGo },
-      { path: 'refund', component: OrderRefund },
-      { path: 'editseat', component: EditSeat },
-      { path: 'editdate', component: EditDate }
+      { path: 'pay', component: OrderPay, meta: { login: true } },
+      { path: 'all', component: OrderAll, meta: { login: true } },
+      { path: 'go', component: OrderGo, meta: { login: true } },
+      { path: 'refund', component: OrderRefund, meta: { login: true } },
+      { path: 'editseat', component: EditSeat, meta: { login: true } },
+      { path: 'editdate', component: EditDate, meta: { login: true } }
     ]
   }, {
     path: '/reserve/selectFlight',
@@ -96,7 +97,8 @@ const routes = [
     path: '/reserve/book',
     component: Book,
     meta: {
-      title: '乘机信息'
+      title: '乘机信息',
+      login: true
     }
   }, {
     path: '/reserve/goback',
@@ -108,53 +110,67 @@ const routes = [
     path: '/reserve/goback/book',
     component: GbBook,
     meta: {
-      title: '乘机信息'
+      title: '乘机信息',
+      login: true
     }
   }, {
     path: '/reserve/service',
     component: Service,
     meta: {
-      title: '【国内航班查询与预定系统】抢购成功'
+      title: '【国内航班查询与预定系统】抢购成功',
+      login: true
     }
   }, {
     path: '/reserve/gbservice',
     component: GbService,
     meta: {
-      title: '【国内航班查询与预定系统】抢购成功'
+      title: '【国内航班查询与预定系统】抢购成功',
+      login: true
     }
   }, {
     path: '/reserve/pay',
     component: Pay,
     meta: {
-      title: '支付页面'
+      title: '支付页面',
+      login: true
     }
   }, {
     path: '/reserve/result',
     component: Result,
     meta: {
-      title: '支付结果'
+      title: '支付结果',
+      login: true
     }
   }
 ]
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: 'hash',
   base: process.env.BASE_URL,
   routes
 })
 
 router.beforeEach((to, from, next) => {
+  const token = store.state.token
   NProgress.start()
-  if (to.meta.title) {
-    document.title = to.meta.title
-  }
+  if (to.meta.title) document.title = to.meta.title
   if (to.path.includes('/home')) {
     store.commit('updateActivePath', '/home')
-  }
-  if (to.path.includes('/order/all')) {
+  } else if (to.path.includes('/order/all')) {
     store.commit('updateActivePath', '/order/all')
   }
-  next()
+  if (to.meta.login) { // 需要登录的页面
+    if (token) {
+      next()
+    } else { // token不存在
+      Vue.prototype.$message.warning('请先登录,再进行相关操作')
+      store.commit('updateActivePath', from.fullPath)
+      store.commit('saveIsLoginDialog', true)
+      NProgress.done()
+    }
+  } else {
+    next()
+  }
 })
 
 router.afterEach(() => {

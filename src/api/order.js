@@ -1,25 +1,18 @@
-/* 订单 */
-import axios from 'axios'
-
-const http = axios.create({
-  baseURL: 'http://192.168.31.50:8003/order',
-  timeout: 5000,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-})
+import http from '@/api/index'
+import store from '@/store/index'
+const userId = store.state.user.id
 
 export function getOrder () {
-  return http.get('status/1')
+  return http.get(`status/${userId}`)
 }
 
 // 0待支付 1支付成功 //3已取消
 export function classifyOrder (status) {
-  return http.get(`status/all/1/${status}`)
+  return http.get(`status/all/${userId}/${status}`)
 }
 
 export function allOrder () {
-  return http.get('status/all/1')
+  return http.get(`status/all/${userId}`)
 }
 
 // 结账

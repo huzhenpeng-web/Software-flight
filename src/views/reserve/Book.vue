@@ -217,7 +217,7 @@ export default {
       // 更新舱位等级
       this.updatePassengerInfo(this.flightSeat)
       const passengerObj = {
-        userId: '1',
+        userId: this.$store.state.user.id,
         orderFlightDto: [
           {
             departDate: this.pathInfo.flightDate,

@@ -3,7 +3,7 @@ module.exports = defineConfig({
   transpileDependencies: true,
   devServer: {
     host: 'localhost',
-    port: 8080,
+    port: 80,
     open: true
   },
   publicPath: './',
@@ -16,7 +16,6 @@ module.exports = defineConfig({
         vue: 'Vue',
         vuex: 'Vuex',
         'vue-router': 'VueRouter',
-        // 'vuex-persistedstate': 'createPersistedState',
         axios: 'axios',
         nprogress: 'NProgress',
         moment: 'moment'

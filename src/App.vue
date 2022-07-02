@@ -41,7 +41,9 @@ export default {
   },
   data () {
     return {
+      // 登录对话框
       showLoginDialog: false,
+      // 注册对话框
       showRegisterDialog: false
     }
   },
