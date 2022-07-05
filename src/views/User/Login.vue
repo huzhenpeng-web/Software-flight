@@ -64,6 +64,7 @@ export default {
           this.saveToken(res.data.token)
           this.saveUser(res.data.user)
           this.saveIsLoginDialog(false)
+          location.reload()
         } else {
           this.$message.error('登录失败')
         }

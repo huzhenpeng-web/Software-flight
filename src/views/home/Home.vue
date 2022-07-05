@@ -34,20 +34,22 @@
       <div class="no_result">
         <el-empty v-if="noResultShow" image="https://webresource.c-ctrip.com/ResH5FlightOnline/flight-home/online/no_result.png">抱歉，没有找到满足条件的航班</el-empty>
         <!-- 推荐城市 -->
-        <div>
+        <div v-loading="loadingStatus" element-loading-text="航班路线正在加载中">
           <el-card v-for="(item,index) in cities" :key="index">
             <div class="content">
               <span style="margin-right:10px;">{{index + 1}}</span>
-              <span>item</span>
+              <span>{{item}}</span>
             </div>
           </el-card>
         </div>
+        <el-button v-if="loadingStatus" style="margin-top:50px;" type="danger" @click="cancelRecommend">取消推荐</el-button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios'
 import Clock from 'vue-clock2'
 import City from '@/components/city/City.vue'
 import { roadRecommend } from '@/api/query'
@@ -57,8 +59,9 @@ export default {
     return {
       departucreCity: '',
       arriveCity: '',
-      noResultShow: true,
-      cities: []
+      noResultShow: false,
+      cities: [],
+      loadingStatus: false
     }
   },
   methods: {
@@ -69,17 +72,31 @@ export default {
     },
     // 航班推荐
     async getRecommendFlight () {
-      if (this.departucreCity === '' || this.arriveCity === '') return this.$message.warning('出发和到达城市都要填写完整')
-      this.noResultShow = true
-      const { data: res } = await roadRecommend(this.departucreCity, this.arriveCity)
-      this.cities = res.data
-      this.noResultShow = false
+      try {
+        this.loadingStatus = true
+        if (this.departucreCity === '' || this.arriveCity === '') return this.$message.warning('出发和到达城市都要填写完整')
+        this.noResultShow = true
+        const { data: res } = await roadRecommend(this.departucreCity, this.arriveCity)
+        if (res.resultCode === 500) this.noResultShow = true
+        this.cities = res.data
+        this.noResultShow = false
+        this.loadingStatus = false
+      } catch (e) {
+        this.noResultShow = true
+      }
     },
     getDepartucreCity (val) {
       this.departucreCity = val
     },
     getArriveCity (val) {
       this.arriveCity = val
+    },
+    // 取消推荐
+    cancelRecommend () {
+      this.loadingStatus = false
+      const cancelToken = axios.CancelToken
+      const source = cancelToken.source()
+      source.cancel('取消航班路线请求')
     }
   },
   components: {
@@ -95,7 +112,7 @@ export default {
   position: relative;
   .flight {
     width: 100%;
-    height: 600px;
+    height: 550px;
     background-image: linear-gradient(to right top, #845ec2, #a55dbd, #c15db5, #d95fab, #ec64a0, #f76e91, #fd7b84, #ff8a7a, #ffa26e, #ffbd66, #ffda65, #f9f871);
     color: #fff;
     font-size: 65px;
@@ -156,6 +173,11 @@ export default {
         align-items: center;
       }
     }
+  }
+  .login-status {
+    width: 100%;
+    position: absolute;
+    top: 80%;
   }
 }
 </style>

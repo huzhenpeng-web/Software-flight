@@ -21,8 +21,9 @@
         </el-dropdown-menu>
       </el-dropdown>
     </div>
-    <div class="avatar" v-if="loginStatus">
-      <img src="@/assets/images/avatar/tx.png" alt="">
+    <div v-if="loginStatus">
+      当前登录用户:
+      <span class="avatar">{{$store.state.user.name}}</span>
     </div>
   </div>
 </template>
@@ -73,13 +74,8 @@ export default {
     color: #409eff;
   }
   .avatar {
-    width: 35px;
-    height: 35px;
     cursor: pointer;
-    img {
-      width: 100%;
-      height: 100%;
-    }
+    color: #409eff;
   }
 }
 </style>

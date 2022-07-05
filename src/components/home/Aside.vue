@@ -64,6 +64,7 @@ export default {
   },
   mounted () {
     if (this.$route.path.includes('/reserve')) {
+      console.log(1)
       return this.updateActivePath('/reserve')
     } else if (this.$route.path.includes('/query')) {
       return this.updateActivePath('/query')

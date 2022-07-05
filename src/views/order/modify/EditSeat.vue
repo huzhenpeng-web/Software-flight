@@ -86,7 +86,7 @@ export default {
         this.$message.success('修改座位成功')
         return this.$router.replace('/order/all')
       } else { // 失败
-        this.$message.success('修改座位失败')
+        this.$message.error('修改座位失败')
       }
     }
   }

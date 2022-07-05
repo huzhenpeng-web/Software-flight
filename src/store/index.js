@@ -4,7 +4,7 @@ import createPersistedState from 'vuex-persistedstate'
 import { removeDuplicates } from '@/utils/remove'
 
 Vue.use(Vuex)
-const PERSIST_PATHS = ['loginStatus', 'activePath', 'activeStep', 'reserveForm', 'reserveFlight', 'isCollapse', 'editOrderInfo', 'token', 'user']
+const PERSIST_PATHS = ['loginStatus', 'activePath', 'reserveForm', 'reserveFlight', 'isCollapse', 'editOrderInfo', 'token', 'user']
 
 export default new Vuex.Store({
   state: {

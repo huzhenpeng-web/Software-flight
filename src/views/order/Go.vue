@@ -348,8 +348,14 @@ export default {
           console.log(id)
           const { data: res } = await returnTicket(id)
           console.log(res)
-          // 退款成功 重新获取订单
-          this.getAllOrder()
+          // 退款成功
+          if (res.resultCode === 200) {
+            // 退款成功 重新获取订单
+            this.$message.success('退款成功')
+            this.getAllOrder()
+          } else if (res.resultCode === 500) {
+            this.$message.error('当前状态无法退款')
+          }
         })
         .catch(() => {
           this.$message.info('已取消退款')
