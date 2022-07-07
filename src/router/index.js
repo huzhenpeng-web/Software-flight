@@ -164,7 +164,6 @@ router.beforeEach((to, from, next) => {
       next()
     } else { // token不存在
       Vue.prototype.$message.warning('请先登录,再进行相关操作')
-      // store.commit('updateActivePath', from.fullPath)
       store.commit('saveIsLoginDialog', true)
       NProgress.done()
     }

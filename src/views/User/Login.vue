@@ -7,11 +7,11 @@
         <img src="@/assets/images/avatar/tx.png" alt="">
       </div>
       <!-- 登录表单 -->
-      <div class="login_div">
+      <div class="login_div" @keyup.enter="login">
         <div>
           <el-form :model="loginForm" ref="loginFormRef" :rules="loginFormRules">
             <el-form-item label="账号:" prop="username">
-              <el-input v-model="loginForm.username" clearable></el-input>
+              <el-input v-focus v-model="loginForm.username" clearable></el-input>
             </el-form-item>
             <el-form-item label="密码:" prop="password">
               <el-input v-model="loginForm.password" type="password" clearable></el-input>

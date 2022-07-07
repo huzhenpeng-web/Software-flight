@@ -43,17 +43,17 @@
                     <use xlink:href="#icon-feijipiao"></use>
                   </svg>
                 </el-tooltip>
-                <el-tooltip v-if="scope.row.orderStatus === 1 || scope.row.orderStatus === 4" class="item" effect="dark" content="修改订单" placement="top">
-                  <el-dropdown>
-                    <span class="el-dropdown-link">
-                      <i class="el-icon-more"></i>
-                    </span>
-                    <el-dropdown-menu slot="dropdown">
-                      <el-dropdown-item @click.native="editSeat(scope.row)">修改舱位</el-dropdown-item>
-                      <el-dropdown-item @click.native="editDate(scope.row)">修改日期</el-dropdown-item>
-                    </el-dropdown-menu>
-                  </el-dropdown>
-                </el-tooltip>
+                <!-- <el-tooltip  class="item" effect="dark" content="修改订单" placement="top"> -->
+                <el-dropdown v-if="scope.row.orderStatus === 1 || scope.row.orderStatus === 4">
+                  <span class="el-dropdown-link">
+                    <i class="el-icon-more"></i>
+                  </span>
+                  <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item @click.native="editSeat(scope.row)">修改舱位</el-dropdown-item>
+                    <el-dropdown-item @click.native="editDate(scope.row)">修改日期</el-dropdown-item>
+                  </el-dropdown-menu>
+                </el-dropdown>
+                <!-- </el-tooltip> -->
               </div>
             </template>
           </el-table-column>

@@ -35,6 +35,7 @@
         <el-empty v-if="noResultShow" image="https://webresource.c-ctrip.com/ResH5FlightOnline/flight-home/online/no_result.png">抱歉，没有找到满足条件的航班</el-empty>
         <!-- 推荐城市 -->
         <div v-loading="loadingStatus" element-loading-text="航班路线正在加载中">
+          <div class="result" v-if="cities.length !==0">共为您推荐{{cities.length}}条航班路线</div>
           <el-card v-for="(item,index) in cities" :key="index">
             <div class="content">
               <span style="margin-right:10px;">{{index + 1}}</span>
@@ -73,8 +74,8 @@ export default {
     // 航班推荐
     async getRecommendFlight () {
       try {
-        this.loadingStatus = true
         if (this.departucreCity === '' || this.arriveCity === '') return this.$message.warning('出发和到达城市都要填写完整')
+        this.loadingStatus = true
         this.noResultShow = true
         const { data: res } = await roadRecommend(this.departucreCity, this.arriveCity)
         if (res.resultCode === 500) this.noResultShow = true
@@ -179,5 +180,9 @@ export default {
     position: absolute;
     top: 80%;
   }
+}
+.result{
+  margin: 30px;
+  font-size: 35px;
 }
 </style>

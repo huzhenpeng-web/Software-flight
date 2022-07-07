@@ -10,7 +10,7 @@
         </el-header>
         <el-main>
           <!-- 路由占位符 -->
-          <keep-alive include="Reserve">
+          <keep-alive include="Reserve,Flight">
             <router-view></router-view>
           </keep-alive>
           <el-dialog title="用户登录" @close="handleClose" :visible.sync="showLoginDialog" width="50%">

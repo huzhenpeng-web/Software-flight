@@ -91,6 +91,7 @@ import { flightNoQuery, flightQuery, flightPriceQuery } from '@/api/query'
 import { mapMutations } from 'vuex'
 import City from '@/components/city/City.vue'
 export default {
+  name: 'Flight',
   components: {
     City
   },
