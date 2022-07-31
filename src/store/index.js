@@ -75,6 +75,11 @@ export default new Vuex.Store({
     saveToken (state, value) {
       state.token = value
     },
+    // 清空token和user
+    clearTokenAndUser (state) {
+      state.token = ''
+      state.user = {}
+    },
     // 保存用户信息
     saveUser (state, value) {
       state.user = value

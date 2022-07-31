@@ -46,6 +46,7 @@
         <el-button v-if="loadingStatus" style="margin-top:50px;" type="danger" @click="cancelRecommend">取消推荐</el-button>
       </div>
     </div>
+
   </div>
 </template>
 

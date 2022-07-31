@@ -7,7 +7,7 @@ axios.interceptors.request.use((config) => {
 })
 
 const http = axios.create({
-  baseURL: 'http://192.168.31.50:9527/',
+  baseURL: 'http://47.114.90.231:9527/',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'

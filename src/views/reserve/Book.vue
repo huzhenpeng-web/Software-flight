@@ -1,6 +1,6 @@
 <template>
   <!-- 购买机票页面 -->
-  <div class="book-container">
+  <div class="book-container" v-if="totalFlightPrice">
     <!-- 面包屑 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/reserve' }">机票预定</el-breadcrumb-item>
@@ -35,7 +35,7 @@
               </el-radio-group>
             </div>
             <!-- 动态组件 -->
-            <component ref="passengerRef" v-for="(item,index) in PassengerArr" :is="item.name" :key="index">
+            <component @sendP="getPerson" ref="passengerRef" v-for="(item,index) in PassengerArr" :is="item.name" :key="index">
               <span slot="passengerNum-slot">{{index + 1}}</span>
               <i class="el-icon-close" slot="close-slot" @click="removePassenger(index)" v-show="index !== 0">删除</i>
             </component>
@@ -93,10 +93,22 @@
             </div>
           </div>
           <div class="ticket-price">
-            <div>
-              <span>人数:</span>
+            <div v-if="personCount.adult !== 0">
+              <span>成人:</span>
               <span>
-                ￥{{resultData.price}} x {{PassengerArr.length}}
+                ￥{{this.resultData.price + this.seatClass}} x {{personCount.adult}}
+              </span>
+            </div>
+            <div v-if="personCount.child !== 0">
+              <span>儿童:</span>
+              <span>
+                ￥{{this.resultData.price * 0.8 + this.seatClass}} x {{personCount.child}}
+              </span>
+            </div>
+            <div v-if="personCount.baby !== 0">
+              <span>婴儿:</span>
+              <span>
+                ￥{{this.resultData.price * 0.3 + this.seatClass}} x {{personCount.baby}}
               </span>
             </div>
             <div>
@@ -114,20 +126,14 @@
             <div>
               <span>每天特惠:</span>
               <span>
-                ￥{{ticketPrice.todayPrice}}
+                ￥{{ticketPrice.todayPrice}} x {{PassengerArr.length}}
               </span>
             </div>
           </div>
           <!-- 下 -->
           <div class="bottom">
             <div>
-              ￥{{
-                resultData.price * PassengerArr.length +
-                ticketPrice.tax * PassengerArr.length +
-                ticketPrice.luggage * PassengerArr.length +
-                ticketPrice.todayPrice +
-                seatClass * PassengerArr.length
-              }}
+              ￥{{totalFlightPrice}}
             </div>
           </div>
           <div style="text-align:right;color:red;font-size:5px;">最终价格,请到结算页面查看。</div>
@@ -175,12 +181,12 @@ export default {
       seatClass: 0,
       flightSeat: 3,
       btnLoading: false,
-      person: {
+      commitFlag: false,
+      personCount: {
         adult: 0,
         baby: 0,
         child: 0
-      },
-      commitFlag: false
+      }
     }
   },
   methods: {
@@ -192,6 +198,7 @@ export default {
         return this.$message.error('查询结果失败!')
       }
       this.resultData = res.data
+      console.log(this.resultData)
       this.description1 = '出行提醒: ' + `抵达${this.resultData.arriveCityName}提醒· ` + ` ${this.resultData.departureCityName}出港提醒`
     },
     // 添加乘客数量
@@ -202,6 +209,7 @@ export default {
     // 减少乘客
     removePassenger (index) {
       this.PassengerArr.splice(index, 1)
+      console.log(index)
     },
     // 下一步 提交乘客信息
     async commitPassenger () {
@@ -267,8 +275,33 @@ export default {
     // 获取票价规则
     async getTicket () {
       const { data: res } = await ticketPrice()
+      console.log(res)
       this.ticketPrice = res.data
       this.seatClass = this.ticketPrice.economyClass
+    },
+    // 获取人数
+    getPerson () {
+      this.resetPersonCount()
+      let arr = []
+      arr = this.$refs.passengerRef.map(item => {
+        return { p: item.person }
+      })
+      console.log(arr)
+      arr.forEach(item => {
+        if (item.p === '成人') {
+          this.personCount.adult++
+        } else if (item.p === '儿童') {
+          this.personCount.child++
+        } else if (item.p === '婴儿') {
+          this.personCount.baby++
+        }
+      })
+    },
+    // 重置人数数量
+    resetPersonCount () {
+      this.personCount.adult = 0
+      this.personCount.baby = 0
+      this.personCount.child = 0
     }
   },
   created () {
@@ -282,7 +315,21 @@ export default {
     this.path = JSON.parse(localStorage.getItem('path'))
   },
   computed: {
-    ...mapState(['passengerInfo'])
+    ...mapState(['passengerInfo']),
+    // 成人价格
+    adultPrice () {
+      return (this.resultData.price + this.seatClass) * this.personCount.adult
+    },
+    // 儿童价格
+    childPrice () {
+      return parseInt(this.resultData.price * 0.8 + this.seatClass) * this.personCount.child
+    },
+    babyPrice () {
+      return parseInt(this.resultData.price * 0.3 + this.seatClass) * this.personCount.baby
+    },
+    totalFlightPrice () {
+      return this.adultPrice + this.childPrice + this.babyPrice + (this.ticketPrice.tax + this.ticketPrice.luggage + this.ticketPrice.todayPrice) * this.PassengerArr.length
+    }
   },
   watch: {
     PassengerArr (newVal) {

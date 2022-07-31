@@ -57,7 +57,7 @@ export default {
     // 获取订单信息
     async getUserOrder () {
       const { data: res } = await getOrder()
-      this.url = 'http://192.168.31.50:9527/order/pay/' + res.data.id
+      this.url = 'http://47.114.90.231:9527/order/pay/' + res.data.id
       this.price = res.data.totalPrice
       this.orderId = res.data.id
       this.creatQrCode()

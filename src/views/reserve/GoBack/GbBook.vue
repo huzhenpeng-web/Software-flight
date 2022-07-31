@@ -1,6 +1,6 @@
 <template>
   <!-- 往返 -->
-  <div class="gb_book_container">
+  <div class="gb_book_container" v-if="totalFlightPrice">
     <!-- 面包屑 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/reserve' }">机票预定</el-breadcrumb-item>
@@ -34,7 +34,7 @@
                 <el-radio-button label="头等舱"></el-radio-button>
               </el-radio-group>
             </div>
-            <component ref="passengerRef" v-for="(item,index) in PassengerArr" :is="item.name" :key="index">
+            <component @sendP="getPerson" ref="passengerRef" v-for="(item,index) in PassengerArr" :is="item.name" :key="index">
               <span slot="passengerNum-slot">{{index + 1}}</span>
               <i class="el-icon-close" slot="close-slot" @click="removePassenger(index)" v-show="index !== 0">删除</i>
             </component>
@@ -131,39 +131,78 @@
           <div class="price_description">
             <!-- go -->
             <div class="go">
-              <span>去程</span>
+              <span style="margin-left:50px;">去程</span>
               <div class="go_price">
-                <p>
-                  人数:
-                  <span>￥{{goFlight.price}}x{{PassengerArr.length}}</span>
-                </p>
-                <p>
-                  行李:
-                  <span>
-                    ￥{{ticket.luggage}}x{{PassengerArr.length}}
-                  </span>
-                </p>
-                <p>
-                  燃油税:
-                  <span>
-                    ￥{{ticket.tax}}x{{PassengerArr.length}}
-                  </span>
-                </p>
+                <div>
+                  <p v-if="personCount.adult !== 0">
+                    成人:
+                    <span>￥{{this.goFlight.price + this.seatClass}} x {{personCount.adult}}</span>
+                  </p>
+                  <p v-if="personCount.child !== 0">
+                    儿童:
+                    <span>￥{{this.goFlight.price * 0.8 + this.seatClass}} x {{personCount.child}}</span>
+                  </p>
+                  <p v-if="personCount.baby !== 0">
+                    婴儿:
+                    <span>￥{{this.goFlight.price * 0.3 + this.seatClass}} x {{personCount.baby}}</span>
+                  </p>
+                </div>
+                <div>
+                  <p>
+                    行李:
+                    <span>
+                      ￥{{ticket.luggage}} x {{PassengerArr.length}}
+                    </span>
+                  </p>
+                  <p>
+                    燃油税:
+                    <span>
+                      ￥{{ticket.tax}} x {{PassengerArr.length}}
+                    </span>
+                  </p>
+                  <p>
+                    每天特惠:
+                    <span>
+                      ￥{{ticket.todayPrice}} x {{PassengerArr.length}}
+                    </span>
+                  </p>
+                </div>
               </div>
             </div>
             <!-- back -->
             <div class="back">
-              <span>返程</span>
+              <span style="margin-left:50px;">返程</span>
               <div class="go_price">
-                <p>
-                  人数:￥{{backFlight.price}}x{{PassengerArr.length}}
-                </p>
-                <p>行李:￥{{ticket.luggage}}x{{PassengerArr.length}}</p>
-                <p>燃油税:￥{{ticket.tax}}x{{PassengerArr.length}}</p>
+                <div>
+                  <p v-if="personCount.adult !== 0">
+                    成人:
+                    <span>
+                      ￥{{this.backFlight.price + this.seatClass}} x {{personCount.adult}}
+                    </span>
+                  </p>
+                  <p v-if="personCount.child !== 0">
+                    儿童:
+                    <span>￥{{this.backFlight.price * 0.8+ this.seatClass}} x {{personCount.child}}</span>
+                  </p>
+                  <p v-if="personCount.baby !== 0">
+                    婴儿:
+                    <span>￥{{this.backFlight.price  * 0.3 + this.seatClass}} x {{personCount.baby}}</span>
+                  </p>
+                </div>
+                <div>
+                  <p>行李:￥{{ticket.luggage}} x {{PassengerArr.length}}</p>
+                  <p>燃油税:￥{{ticket.tax}} x {{PassengerArr.length}}</p>
+                  <p>
+                    每天特惠:
+                    <span>
+                      ￥{{ticket.todayPrice}} x {{PassengerArr.length}}
+                    </span>
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-          <div class="price">￥{{(goFlight.price + seatClass +backFlight.price + ticket.luggage + ticket.tax) * PassengerArr.length}}</div>
+          <div class="price">￥{{totalFlightPrice}}</div>
           <div style="text-align:right;color:red;font-size:5px;">最终价格,请到结算页面查看。</div>
         </div>
       </div>
@@ -214,7 +253,12 @@ export default {
       seatClass: 0,
       flightSeat: 3,
       btnLoading: false,
-      commitFlag: false
+      commitFlag: false,
+      personCount: {
+        adult: 0,
+        baby: 0,
+        child: 0
+      }
     }
   },
   methods: {
@@ -232,10 +276,8 @@ export default {
       if (res.resultCode !== 200 || result.resultCode !== 200) {
         return this.$message.error('获取数据失败,请刷新!')
       }
-      console.log(res)
       this.goFlight = res.data
       this.backFlight = result.data
-      console.log(result)
       this.description1 = '出行提醒: ' + `抵达${this.goFlight.arriveCityName}提醒· ` + ` ${this.goFlight.departureCityName}出港提醒`
     },
     // 添加乘客数量
@@ -324,6 +366,30 @@ export default {
       const { data: res } = await ticketPrice()
       this.ticket = res.data
       this.seatClass = this.ticket.economyClass
+    },
+    // 获取人数数量
+    getPerson () {
+      this.resetPersonCount()
+      let arr = []
+      arr = this.$refs.passengerRef.map(item => {
+        return { p: item.person }
+      })
+      console.log(arr)
+      arr.forEach(item => {
+        if (item.p === '成人') {
+          this.personCount.adult++
+        } else if (item.p === '儿童') {
+          this.personCount.child++
+        } else if (item.p === '婴儿') {
+          this.personCount.baby++
+        }
+      })
+    },
+    // 重置人数数量
+    resetPersonCount () {
+      this.personCount.adult = 0
+      this.personCount.baby = 0
+      this.personCount.child = 0
     }
   },
   created () {
@@ -334,7 +400,34 @@ export default {
     this.getTicket()
   },
   computed: {
-    ...mapState(['passengerInfo'])
+    ...mapState(['passengerInfo']),
+    // 去程成人价格
+    adultPrice () {
+      return (this.goFlight.price + this.seatClass) * this.personCount.adult
+    },
+    // 去程儿童价格
+    childPrice () {
+      return parseInt(this.goFlight.price * 0.8 + this.seatClass) * this.personCount.child
+    },
+    // 去程婴儿价格
+    babyPrice () {
+      return parseInt(this.goFlight.price * 0.3 + this.seatClass) * this.personCount.baby
+    },
+    // 返程成人价格
+    adultPriceArrive () {
+      return (this.backFlight.price + this.seatClass) * this.personCount.adult
+    },
+    // 返程儿童价格
+    childPriceArrive () {
+      return parseInt(this.backFlight.price * 0.8 + this.seatClass) * this.personCount.child
+    },
+    // 返程婴儿价格
+    babyPriceArrive () {
+      return parseInt(this.backFlight.price * 0.3 + this.seatClass) * this.personCount.baby
+    },
+    totalFlightPrice () {
+      return this.adultPrice + this.adultPriceArrive + this.childPrice + this.childPriceArrive + this.babyPrice + this.babyPriceArrive + this.ticket.tax * this.PassengerArr.length * 2 + this.ticket.luggage * this.PassengerArr.length * 2 + this.ticket.todayPrice * this.PassengerArr.length * 2
+    }
   },
   watch: {
     seatRadio (newVal) {
@@ -488,7 +581,7 @@ export default {
             .go_price {
               display: flex;
               align-items: center;
-              justify-content: space-between;
+              justify-content: space-around;
             }
             p {
               margin-left: 10px;
@@ -501,7 +594,7 @@ export default {
             .go_price {
               display: flex;
               align-items: center;
-              justify-content: space-between;
+              justify-content: space-around;
             }
             p {
               margin-left: 10px;

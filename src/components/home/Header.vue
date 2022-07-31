@@ -23,7 +23,7 @@
     </div>
     <div v-if="loginStatus">
       当前登录用户:
-      <span class="avatar">{{$store.state.user.name}}</span>
+      <span class="avatar" @click="logout">{{$store.state.user.name}}</span>
     </div>
   </div>
 </template>
@@ -32,12 +32,33 @@
 import { mapState, mapMutations } from 'vuex'
 export default {
   methods: {
-    ...mapMutations(['saveIsLoginDialog', 'saveRegisterDialog']),
+    ...mapMutations(['saveIsLoginDialog', 'saveRegisterDialog', 'clearTokenAndUser', 'changeLoginStatus']),
     login () {
       this.saveIsLoginDialog(true)
     },
     register () {
       this.saveRegisterDialog(true)
+    },
+    // 退出登录
+    logout () {
+      this.$confirm('是否退出登录?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.clearTokenAndUser()
+        this.changeLoginStatus(false)
+        this.$message({
+          type: 'success',
+          message: '已退出登录!'
+        })
+        this.$router.replace('/home')
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消退出登录。'
+        })
+      })
     }
   },
   computed: {

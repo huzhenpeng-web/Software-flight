@@ -113,6 +113,8 @@ export default {
         // 婴儿
         this.passengerForm.ticketType = 3
       }
+      // 2022-7-21测试
+      this.$emit('sendP', this.person)
     }
   },
   watch: {

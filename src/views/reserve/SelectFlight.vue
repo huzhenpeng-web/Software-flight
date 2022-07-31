@@ -13,7 +13,7 @@
     <div v-if="!isEmpty">
       <div class="flight-title">
         <span>单程:</span>
-        <span class="city">{{flightReserveForm.departcureCity}}-{{flightReserveForm.arriveCity}}</span>
+        <span class="city">{{this.$route.query.depart}}-{{this.$route.query.arrive}}</span>
         <span>{{this.$route.query.date | dateFormat}}</span>
       </div>
       <!-- 筛选框 -->
@@ -139,8 +139,8 @@ export default {
         })
         if (this.reserveFlight.resultCode !== 200) {
           this.isEmpty = true
-          this.emptyDescription = `您查询的 ${this.reserveForm.departcureCity} 至
-        ${this.reserveForm.arriveCity}（出发日期：${this.$route.query.date}）的机票可能因无航班或航班座位已售完导致暂时无法查询到对应价格。 建议您更换旅行日期或旅行城市重新查询`
+          this.emptyDescription = `您查询的 ${this.$route.query.depart} 至
+        ${this.$route.query.arrive}（出发日期：${this.$route.query.date}）的机票可能因无航班或航班座位已售完导致暂时无法查询到对应价格。 建议您更换旅行日期或旅行城市重新查询`
         }
       } catch (e) {
         this.$message.error('发起网络请求失败,请刷新重试')

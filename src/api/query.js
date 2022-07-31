@@ -34,3 +34,8 @@ export function flightPriceQuery (data) {
 export function roadRecommend (departCityName, arriveCityName) {
   return http.get(`flight/recommend/${departCityName}/${arriveCityName}`, { timeout: 10 * 60 * 1000 })
 }
+
+// 地图航班查询
+export function mapQuery (cityName) {
+  return http.get(`flight/name/log/${cityName}`)
+}

@@ -361,7 +361,7 @@ export default {
     // 结账
     checkout (info) {
       this.checkoutInfo = info
-      this.url = 'http://192.168.31.50:9527/order/pay/' + info.id
+      this.url = 'http://47.114.90.231:9527/order/pay/' + info.id
       this.creatQrCode()
       this.checkoutVisible = true
     },

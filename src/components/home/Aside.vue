@@ -41,6 +41,7 @@ export default {
       menus: [
         { name: '首页', icon: '#icon-shouye', path: '/home' },
         { name: '查询航班', icon: '#icon-sousuo', path: '/query' },
+        { name: '航线地图', icon: '#icon-ditu1', path: '/map' },
         { name: '机票预定', icon: '#icon-feiji', path: '/reserve' }
       ],
       // 订单

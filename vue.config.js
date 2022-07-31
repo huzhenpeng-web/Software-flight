@@ -18,7 +18,8 @@ module.exports = defineConfig({
         'vue-router': 'VueRouter',
         axios: 'axios',
         nprogress: 'NProgress',
-        moment: 'moment'
+        moment: 'moment',
+        echarts: 'echarts'
       })
 
       config.plugin('html').tap(args => {

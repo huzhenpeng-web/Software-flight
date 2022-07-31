@@ -41,6 +41,7 @@ const GbService = () => import(/* webpackChunkName:"reserve" */ '@/views/reserve
 const Pay = () => import(/* webpackChunkName:"reserve" */ '@/views/reserve/Pay/Pay.vue')
 // import Result from '@/views/reserve/Pay/Result.vue'
 const Result = () => import(/* webpackChunkName:"reserve" */ '@/views/reserve/Pay/Result.vue')
+const Map = () => import(/* webpackChunkName:"Query" */ '@/views/home/Map.vue')
 Vue.use(VueRouter)
 
 const routes = [
@@ -140,6 +141,13 @@ const routes = [
     meta: {
       title: '支付结果',
       login: true
+    }
+  },
+  {
+    path: '/map',
+    component: Map,
+    meta: {
+      title: '每日航线地图'
     }
   }
 ]
