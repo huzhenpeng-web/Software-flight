@@ -8,7 +8,7 @@ import '@/assets/css/global.css'
 // import '@/plugins/element'
 import '@/utils/focus'
 import '@/utils/filter'
-import 'default-passive-events'
+// import 'default-passive-events'
 
 Vue.config.productionTip = false
 

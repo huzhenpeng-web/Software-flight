@@ -265,10 +265,13 @@ export default {
         }
       })
       myChart.on('click', function (param) {
-        const now = moment().format('YYYY-MM-DD')
-        // console.log(param) // 这里根据param填写你的跳转逻辑
-        that.updateActivePath('/reserve')
-        that.$router.push(`/reserve/selectFlight?depart=${param.data.fromName}&arrive=${param.data.toName}&date=${now}`)
+        console.log(param)
+        if (param.data) {
+          const now = moment().format('YYYY-MM-DD')
+          console.log(param) // 这里根据param填写你的跳转逻辑
+          that.updateActivePath('/reserve')
+          that.$router.push(`/reserve/selectFlight?depart=${param.data.fromName}&arrive=${param.data.toName}&date=${now}`)
+        }
       })
     },
     handleLine () {
