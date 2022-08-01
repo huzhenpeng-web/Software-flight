@@ -14,7 +14,7 @@
       <!-- 头部航班信息 -->
       <div class="status-top">
         <span class="left" v-show="this.flightRadio === '1'">{{flight.flightNo}}</span>
-        <span class="left" v-show="this.flightRadio === '2'">{{flight.departureCityName}}-{{flight.arriveCityName}}</span>
+        <span class="left" v-show="this.flightRadio === '2' || '3'">{{flight.departureCityName}}-{{flight.arriveCityName}}</span>
         <span class="right">{{flight.departDate}}</span>
         <span class="right">为您搜索到{{length}}条结果</span>
       </div>

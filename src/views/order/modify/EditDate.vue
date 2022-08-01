@@ -21,6 +21,10 @@
             <span class="m_left">{{order.bookingTime | dateSplice}}</span>
           </div>
           <div>
+            航班出发日期:
+            <span class="m_left" v-if="order.flightJourneys">{{order.flightJourneys[0].departDate}}</span>
+          </div>
+          <div>
             订单类型:
             <span class="m_left" v-if="order.tripType === 0">单程</span>
             <span class="m_left" v-if="order.tripType === 1">往返</span>
@@ -68,6 +72,7 @@ export default {
   methods: {
     saveOrder () {
       this.order = this.editOrderInfo
+      console.log(this.order)
       this.user = this.editOrderInfo.userVo
     },
     goBack () {
